@@ -3,6 +3,9 @@ A bot which posts a random image to discord channel from Azrue Storage.
 
 ## Running locally
 
+Preparation
+ 1. Create .env file for docker compose
+
 ```bash
 docker compose build
 docker compose up
