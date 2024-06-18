@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0-preview AS installer-env
 
-COPY . /src/dotnet-function-app
-RUN cd /src/dotnet-function-app && \
+COPY . /src/
+RUN cd /src/FunctionApp.Isolated && \
 mkdir -p /home/site/wwwroot && \
 dotnet publish *.csproj --output /home/site/wwwroot
 

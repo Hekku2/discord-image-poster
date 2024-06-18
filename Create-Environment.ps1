@@ -22,38 +22,14 @@ New-AzResourceGroup -Name $settingsJson.ResourceGroup -Location $settingsJson.Lo
 
 Write-Host 'Deploying template...'
 $parameters = @{
-    baseName = $settingsJson.ApplicationName
+    baseName        = $settingsJson.ApplicationName
+    discordSettings = @{
+        token     = $settingsJson.DiscordToken
+        channelId = $settingsJson.DiscordChannelId
+        guildId   = $settingsJson.DiscordGuildId
+    }
 }
-$result = New-AzResourceGroupDeployment `
+New-AzResourceGroupDeployment `
     -ResourceGroupName $settingsJson.ResourceGroup `
     -TemplateFile 'infra/main.bicep' `
-    -TemplateParameterObject $parameters `
-    -Verbose
-
-$storageAccountName = $result.Outputs.storageAccountName.Value
-$applicationInsightsName = $result.Outputs.applicationInsightsName.Value
-$functionAppIdentity = $result.Outputs.functionAppIdentity.Value
-$containerAppEnvironmentName = "cae-$($settingsJson.ApplicationName)"
-$functionAppName = "func-$($settingsJson.ApplicationName)"
-
-Write-Host "Creating environment $containerAppEnvironmentName..."
-az containerapp env create `
-    --name $containerAppEnvironmentName `
-    --enable-workload-profiles `
-    --resource-group $settingsJson.ResourceGroup `
-    --location $settingsJson.Location `
-    --logs-destination none
-
-Write-Host "Creating function app $functionAppName with storage $storageAccountName..."
-az functionapp create `
-    --name $functionAppName `
-    --storage-account $storageAccountName `
-    --environment $containerAppEnvironmentName `
-    --workload-profile-name "Consumption" `
-    --resource-group $settingsJson.ResourceGroup `
-    --functions-version 4 `
-    --runtime dotnet-isolated `
-    --image mcr.microsoft.com/azure-functions/dotnet8-quickstart-demo:1.0 `
-    --app-insights $applicationInsightsName `
-    --assign-identity $functionAppIdentity `
-    --debug
+    -TemplateParameterObject $parameters

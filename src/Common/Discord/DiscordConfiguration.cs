@@ -1,10 +1,10 @@
-namespace FunctionApp.Options;
+namespace DiscordImagePoster.Common.Discord;
 
 /// <summary>
 /// Represents the configuration for the Discord bot that is required for
 /// connecting to the Discord API.
 /// </summary>
-public class DiscordOptions
+public class DiscordConfiguration
 {
     /// <summary>
     /// The token of the bot. This is used to authenticate the bot with the

@@ -1,22 +1,16 @@
 using Discord;
 using Discord.Rest;
-using FunctionApp.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace FunctionApp.Services;
-
-public interface IDiscordImagePoster
-{
-    Task SendImage(Stream stream, string fileName);
-}
+namespace DiscordImagePoster.Common.Discord;
 
 public class DiscordImagePoster : IDiscordImagePoster
 {
     private readonly ILogger<DiscordImagePoster> _logger;
-    private readonly DiscordOptions _options;
+    private readonly DiscordConfiguration _options;
 
-    public DiscordImagePoster(ILogger<DiscordImagePoster> logger, IOptions<DiscordOptions> options)
+    public DiscordImagePoster(ILogger<DiscordImagePoster> logger, IOptions<DiscordConfiguration> options)
     {
         _logger = logger;
         _options = options.Value;

@@ -2,29 +2,27 @@ using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
-namespace FunctionApp.Services;
+namespace DiscordImagePoster.Common.BlobStorageImageService;
 
-public interface IImageService
+public class BlobStorageImageService : IBlobStorageImageService
 {
-    Task<BlobDownloadStreamingResult?> GetRandomImageStream();
-}
-
-public class ImageService : IImageService
-{
-    private readonly ILogger<ImageService> _logger;
+    private readonly ILogger<BlobStorageImageService> _logger;
+    private readonly BlobStorageImageSourceOptions _blobConfig;
     private readonly BlobContainerClient _blobContainerClient;
 
-    public ImageService(ILogger<ImageService> logger, BlobContainerClient blobContainerClient)
+    public BlobStorageImageService(ILogger<BlobStorageImageService> logger, IOptions<BlobStorageImageSourceOptions> blobConfig, BlobContainerClient blobContainerClient)
     {
         _logger = logger;
+        _blobConfig = blobConfig.Value;
         _blobContainerClient = blobContainerClient;
     }
 
-    public async Task<BlobDownloadStreamingResult?> GetRandomImageStream()
+    public async Task<(string, BlobDownloadStreamingResult)?> GetRandomImageStream()
     {
-        _logger.LogInformation("Getting random image");
-        var allImages = await GetAllImages(_blobContainerClient, "testfolder");
+        _logger.LogInformation("Getting random image from folder: {Folder}", _blobConfig.FolderPath);
+        var allImages = await GetAllImages(_blobContainerClient, _blobConfig.FolderPath);
         var randomImage = allImages.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
 
         if (randomImage is null)
@@ -35,7 +33,7 @@ public class ImageService : IImageService
 
         _logger.LogDebug("Selected image: {Name}", randomImage.Blob.Name);
         var blobClient = _blobContainerClient.GetBlobClient(randomImage.Blob.Name);
-        return await blobClient.DownloadStreamingAsync();
+        return (randomImage.Blob.Name, await blobClient.DownloadStreamingAsync());
     }
 
     private async Task<List<BlobHierarchyItem>> GetAllImages(

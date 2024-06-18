@@ -1,6 +1,6 @@
 using Azure.Storage.Blobs;
-using FunctionApp.Options;
-using FunctionApp.Services;
+using DiscordImagePoster.Common.BlobStorageImageService;
+using DiscordImagePoster.Common.Discord;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -10,9 +10,9 @@ var host = new HostBuilder()
     .ConfigureServices(services =>
     {
         services.AddOptions<BlobStorageImageSourceOptions>().BindConfiguration(nameof(BlobStorageImageSourceOptions));
-        services.AddOptions<DiscordOptions>().BindConfiguration(nameof(DiscordOptions));
-        services.AddTransient<IDiscordImagePoster, DiscordImagePoster>();
-        services.AddTransient<IImageService, ImageService>();
+        services.AddOptions<DiscordConfiguration>().BindConfiguration(nameof(DiscordConfiguration));
+        services.AddTransient<IDiscordImagePoster, DiscordImagePoster.Common.Discord.DiscordImagePoster>();
+        services.AddTransient<IBlobStorageImageService, BlobStorageImageService>();
         services.AddTransient<BlobContainerClient>((serviceProvider) =>
         {
             var options = serviceProvider.GetRequiredService<IOptions<BlobStorageImageSourceOptions>>().Value;

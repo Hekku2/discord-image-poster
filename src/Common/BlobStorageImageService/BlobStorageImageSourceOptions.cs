@@ -1,4 +1,4 @@
-namespace FunctionApp.Options;
+namespace DiscordImagePoster.Common.BlobStorageImageService;
 
 public class BlobStorageImageSourceOptions
 {

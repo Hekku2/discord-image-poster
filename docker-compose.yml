@@ -1,13 +1,13 @@
 version: '3.4'
 
 services:
-  local.functions:
-    container_name: local.functions
+  local.functions.isolated:
+    container_name: local.functions.isolated
     build:
-      context: ./src/FunctionApp
-      dockerfile: Dockerfile
+      context: ./src
+      dockerfile: FunctionApp.Isolated/Dockerfile
     ports:
-      - 8080:80
+      - 8081:80
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__AzureWebJobsStorage=AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://azurite:local.storage.emulator/devstoreaccount1;QueueEndpoint=http://local.storage.emulator:10001/devstoreaccount1;TableEndpoint=http://local.storage.emulator:10002/devstoreaccount1;
@@ -21,7 +21,7 @@ services:
     depends_on:
       - local.storage.emulator
     volumes:
-      - ./src/FunctionApp/dev_secrets:/azure-functions-host/Secrets
+      - ./src/FunctionApp.Isolated/dev_secrets:/azure-functions-host/Secrets
 
   local.storage.emulator:
     image: mcr.microsoft.com/azure-storage/azurite:3.30.0
