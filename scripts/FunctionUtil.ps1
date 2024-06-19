@@ -30,6 +30,17 @@ function Get-BlobServiceUriForConnection() {
         ForEach-Object -Process { $_.Value }
 }
 
+function Get-WebSitePackage() {
+    param(
+        [Parameter(ValueFromPipeline = $true, Position = 0, Mandatory)][Microsoft.Azure.Commands.WebApps.Models.PSSite]$WebApp
+    )
+
+    return $WebApp.SiteConfig.AppSettings | `
+        Where-Object { $_.Name -Like 'WEBSITE_RUN_FROM_PACKAGE' } | `
+        Select-Object -First 1 | `
+        ForEach-Object -Process { $_.Value }
+}
+
 function Get-FunctionAppStorageAccountName() {
     param(
         [Parameter(Mandatory)][Microsoft.Azure.Commands.WebApps.Models.PSSite]$WebApp

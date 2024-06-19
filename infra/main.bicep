@@ -9,6 +9,9 @@ param discordSettings DiscordSettings
 @description('Location for all resources.')
 param location string = resourceGroup().location
 
+@description('Web site package location. Leave empty if none is found.')
+param webSitePackageLocation string = ''
+
 module appInsights 'app-insights.bicep' = {
   name: 'application-insights'
   params: {
@@ -50,5 +53,6 @@ module functions 'functions.bicep' = {
     baseName: baseName
     discordSettings: discordSettings
     imageStorageSettings: imageSettings
+    webSitePackageLocation: webSitePackageLocation
   }
 }

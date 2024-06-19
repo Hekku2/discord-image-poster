@@ -6,11 +6,17 @@ param baseName string
 @description('The name of the application insights to be used')
 param applicationInsightsName string
 
+@description('Settings for Discord bot.')
 param discordSettings DiscordSettings
+
+@description('Settings for image storage.')
 param imageStorageSettings ImageStorageSettings
 
 @description('Location for all resources.')
 param location string = resourceGroup().location
+
+@description('Web site package location. Leave empty if none is found.')
+param webSitePackageLocation string = ''
 
 var hostingPlanName = 'asp-${baseName}'
 var functionAppName = 'func-${baseName}'
@@ -56,6 +62,7 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-02-01' = {
 }
 
 var discordSettingsKey = 'DiscordConfiguration'
+var blobStorageKey = 'BlobStorageImageSourceOptions'
 
 resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
   kind: 'linux,functionapp'
@@ -93,6 +100,10 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
           value: '1'
         }
         {
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: webSitePackageLocation
+        }
+        {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: 'dotnet-isolated'
         }
@@ -113,15 +124,15 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
           value: '${discordSettings.channelId}'
         }
         {
-          name: 'BlobStorageImageSourceOptions__ConnectionString'
+          name: '${blobStorageKey}__ConnectionString'
           value: imageStorageSettings.connectionString
         }
         {
-          name: 'BlobStorageImageSourceOptions__ContainerName'
+          name: '${blobStorageKey}__ContainerName'
           value: imageStorageSettings.containerName
         }
         {
-          name: 'BlobStorageImageSourceOptions__FolderPath'
+          name: '${blobStorageKey}__FolderPath'
           value: imageStorageSettings.folderPath
         }
       ]

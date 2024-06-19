@@ -32,7 +32,7 @@ public class ImageSendFunction
     }
 
     [Function("SendImage")]
-    public async Task<HttpResponseData> HttpTriggerSendRandomImage([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+    public async Task<HttpResponseData> SendRandomImage([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
     {
         _logger.LogInformation("Sending random image triggered manually.");
 

@@ -14,16 +14,28 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+.$PSScriptRoot/scripts/FunctionUtil.ps1
+
 Write-Host "Reading settings from file $SettingsFile"
 $settingsJson = Get-Content -Raw -Path $SettingsFile | ConvertFrom-Json
+
+Write-Host 'Checking if there is an existing installation...'
+$webSitePackageLocation = Get-AzWebApp -ResourceGroupName $settingsJson.ResourceGroup -Name "func-$($settingsJson.ApplicationName)" -ErrorAction SilentlyContinue | Get-WebSitePackage
+if ($webSitePackageLocation) {
+    Write-Host "Function app already exist with website package, using it..."
+}
+else {
+    $webSitePackageLocation = ''
+}
 
 Write-Host 'Creating resource group if it doesn''t exist...'
 New-AzResourceGroup -Name $settingsJson.ResourceGroup -Location $settingsJson.Location -Force
 
 Write-Host 'Deploying template...'
 $parameters = @{
-    baseName        = $settingsJson.ApplicationName
-    discordSettings = @{
+    baseName               = $settingsJson.ApplicationName
+    webSitePackageLocation = $webSitePackageLocation
+    discordSettings        = @{
         token     = $settingsJson.DiscordToken
         channelId = $settingsJson.DiscordChannelId
         guildId   = $settingsJson.DiscordGuildId
