@@ -1,6 +1,7 @@
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -12,10 +13,12 @@ public class BlobStorageImageService : IBlobStorageImageService
     private readonly BlobStorageImageSourceOptions _blobConfig;
     private readonly BlobContainerClient _blobContainerClient;
 
-    public BlobStorageImageService(
+    public BlobStorageImageService
+    (
         ILogger<BlobStorageImageService> logger,
         IOptions<BlobStorageImageSourceOptions> blobConfig,
-        BlobContainerClient blobContainerClient)
+        [FromKeyedServices(KeyedServiceConstants.ImageBlobContainerClient)] BlobContainerClient blobContainerClient
+    )
     {
         _logger = logger;
         _blobConfig = blobConfig.Value;

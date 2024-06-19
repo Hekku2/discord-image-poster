@@ -34,6 +34,10 @@ Preparation
 docker compose build
 docker compose up
 ```
+
+NOTE: For some reason, timer doesn't seem start correctly on the first time, but it seems to after retry.
+`Microsoft.Azure.WebJobs.Host.Listeners.FunctionListenerException: The listener for function 'Functions.SendRandomImage' was unable to start`
+
 Then call `http://localhost:8080/api/SendImage?code=mock-secret-for-local-testing`
 
 ### Running in Azure

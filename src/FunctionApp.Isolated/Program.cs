@@ -27,24 +27,20 @@ var host = new HostBuilder()
                 services.GetRequiredService<IOptions<DiscordConfiguration>>());
         });
 
-        // TODO Check if keyed services can be used here
-        services.AddTransient<IBlobStorageImageService, BlobStorageImageService>((services) =>
+        services.AddTransient<IBlobStorageImageService, BlobStorageImageService>();
+        services.AddTransient<IIndexService, BlobStorageIndexService>();
+
+        services.AddKeyedTransient(KeyedServiceConstants.ImageBlobContainerClient, (services, _) =>
         {
             var options = services.GetRequiredService<IOptions<BlobStorageImageSourceOptions>>().Value;
-            var containerClient = new BlobContainerClient(options.ConnectionString, options.ContainerName);
-            return new BlobStorageImageService(
-                services.GetRequiredService<ILogger<BlobStorageImageService>>(),
-                services.GetRequiredService<IOptions<BlobStorageImageSourceOptions>>(),
-                containerClient);
+            return new BlobContainerClient(options.ConnectionString, options.ContainerName);
         });
-        services.AddTransient<IIndexService, BlobStorageIndexService>(services =>
+        services.AddKeyedTransient(KeyedServiceConstants.ImageIndexBlobContainerClient, (services, _) =>
         {
             var options = services.GetRequiredService<IOptions<ImageIndexOptions>>().Value;
-            var containerClient = new BlobContainerClient(options.ConnectionString, options.ContainerName);
-            return new BlobStorageIndexService(
-                services.GetRequiredService<ILogger<BlobStorageIndexService>>(),
-                containerClient);
+            return new BlobContainerClient(options.ConnectionString, options.ContainerName);
         });
+
         services.AddLogging();
     })
     .Build();

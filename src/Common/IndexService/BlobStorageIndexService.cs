@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Azure.Storage.Blobs;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DiscordImagePoster.Common.IndexService;
@@ -11,7 +12,11 @@ public class BlobStorageIndexService : IIndexService
 
     private const string IndexBlobName = "index.json";
 
-    public BlobStorageIndexService(ILogger<BlobStorageIndexService> logger, BlobContainerClient blobContainerClient)
+    public BlobStorageIndexService
+    (
+        ILogger<BlobStorageIndexService> logger,
+        [FromKeyedServices(KeyedServiceConstants.ImageIndexBlobContainerClient)] BlobContainerClient blobContainerClient
+    )
     {
         _logger = logger;
         _blobContainerClient = blobContainerClient;
