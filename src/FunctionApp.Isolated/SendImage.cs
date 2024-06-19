@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace DiscordImagePoster.FunctionApp.Isolated;
 
-public class SendImage
+public class ImageSendFunction
 {
     private readonly ILogger _logger;
     private readonly FeatureSettings _featureSettings;
@@ -17,8 +17,8 @@ public class SendImage
     private readonly IBlobStorageImageService _imageService;
     private readonly IIndexService _indexService;
 
-    public SendImage(
-        ILogger<SendImage> logger,
+    public ImageSendFunction(
+        ILogger<ImageSendFunction> logger,
         IOptions<FeatureSettings> featureSettings,
         IDiscordImagePoster discordImagePoster,
         IBlobStorageImageService imageService,

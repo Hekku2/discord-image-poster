@@ -6,20 +6,20 @@ using Microsoft.Extensions.Logging;
 
 namespace DiscordImagePoster.FunctionApp.Isolated;
 
-public class IndexImages
+public class ImageIndexFunction
 {
     private readonly ILogger _logger;
     private readonly IIndexService _indexService;
     private readonly IBlobStorageImageService _imageService;
 
-    public IndexImages(ILogger<SendImage> logger, IIndexService indexService, IBlobStorageImageService imageService)
+    public ImageIndexFunction(ILogger<ImageSendFunction> logger, IIndexService indexService, IBlobStorageImageService imageService)
     {
         _logger = logger;
         _indexService = indexService;
         _imageService = imageService;
     }
 
-    [Function("GetImageIndex")]
+    [Function(nameof(GetImageIndex))]
     public async Task<ImageIndex?> GetImageIndex([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
     {
         _logger.LogInformation("Getting index.");
@@ -27,7 +27,7 @@ public class IndexImages
         return await _indexService.GetImageIndexAsync();
     }
 
-    [Function("UpdateImageIndex")]
+    [Function(nameof(UpdateImageIndex))]
     public async Task UpdateImageIndex([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
     {
         _logger.LogInformation("Updating image index");
