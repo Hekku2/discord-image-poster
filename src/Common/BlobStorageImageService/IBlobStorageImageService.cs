@@ -4,5 +4,6 @@ namespace DiscordImagePoster.Common.BlobStorageImageService;
 
 public interface IBlobStorageImageService
 {
-    Task<(string, BlobDownloadStreamingResult)?> GetRandomImageStream();
+    Task<string[]> GetAllImagesAsync();
+    Task<BlobDownloadStreamingResult?> GetImageStream(string name);
 }

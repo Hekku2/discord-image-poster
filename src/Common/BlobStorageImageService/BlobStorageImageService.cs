@@ -12,28 +12,31 @@ public class BlobStorageImageService : IBlobStorageImageService
     private readonly BlobStorageImageSourceOptions _blobConfig;
     private readonly BlobContainerClient _blobContainerClient;
 
-    public BlobStorageImageService(ILogger<BlobStorageImageService> logger, IOptions<BlobStorageImageSourceOptions> blobConfig, BlobContainerClient blobContainerClient)
+    public BlobStorageImageService(
+        ILogger<BlobStorageImageService> logger,
+        IOptions<BlobStorageImageSourceOptions> blobConfig,
+        BlobContainerClient blobContainerClient)
     {
         _logger = logger;
         _blobConfig = blobConfig.Value;
         _blobContainerClient = blobContainerClient;
     }
 
-    public async Task<(string, BlobDownloadStreamingResult)?> GetRandomImageStream()
+    public async Task<string[]> GetAllImagesAsync()
     {
-        _logger.LogInformation("Getting random image from folder: {Folder}", _blobConfig.FolderPath);
         var allImages = await GetAllImages(_blobContainerClient, _blobConfig.FolderPath);
-        var randomImage = allImages.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
+        return allImages.Select(blob => blob.Blob.Name).ToArray();
+    }
 
-        if (randomImage is null)
+    public async Task<BlobDownloadStreamingResult?> GetImageStream(string name)
+    {
+        _logger.LogInformation("Getting image from blob: {Blob}", name);
+        var blobClient = _blobContainerClient.GetBlobClient(name);
+        if (await blobClient.ExistsAsync())
         {
-            _logger.LogWarning("No images found!");
-            return null;
+            return await blobClient.DownloadStreamingAsync();
         }
-
-        _logger.LogDebug("Selected image: {Name}", randomImage.Blob.Name);
-        var blobClient = _blobContainerClient.GetBlobClient(randomImage.Blob.Name);
-        return (randomImage.Blob.Name, await blobClient.DownloadStreamingAsync());
+        return null;
     }
 
     private async Task<List<BlobHierarchyItem>> GetAllImages(

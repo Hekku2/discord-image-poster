@@ -1,23 +1,34 @@
 using System.Net;
 using DiscordImagePoster.Common.BlobStorageImageService;
 using DiscordImagePoster.Common.Discord;
+using DiscordImagePoster.Common.IndexService;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DiscordImagePoster.FunctionApp.Isolated;
 
 public class SendImage
 {
     private readonly ILogger _logger;
+    private readonly FeatureSettings _featureSettings;
     private readonly IDiscordImagePoster _discordImagePoster;
     private readonly IBlobStorageImageService _imageService;
+    private readonly IIndexService _indexService;
 
-    public SendImage(ILogger<SendImage> logger, IDiscordImagePoster discordImagePoster, IBlobStorageImageService imageService)
+    public SendImage(
+        ILogger<SendImage> logger,
+        IOptions<FeatureSettings> featureSettings,
+        IDiscordImagePoster discordImagePoster,
+        IBlobStorageImageService imageService,
+        IIndexService indexService)
     {
         _logger = logger;
+        _featureSettings = featureSettings.Value;
         _discordImagePoster = discordImagePoster;
         _imageService = imageService;
+        _indexService = indexService;
     }
 
     [Function("SendImage")]
@@ -34,6 +45,12 @@ public class SendImage
     public async Task TriggerTimerSendRandomImage([TimerTrigger("0 0 */4 * * *")] TimerInfo timer)
     {
         _logger.LogDebug("Sending timed random image");
+        if (_featureSettings.DisableTimedSending)
+        {
+            _logger.LogInformation("No timed sending enabled, skipping.");
+            return;
+        }
+
         await SendRandomImage();
 
         if (timer.ScheduleStatus is not null)
@@ -44,12 +61,31 @@ public class SendImage
 
     private async Task SendRandomImage()
     {
-        var result = await _imageService.GetRandomImageStream();
+        var index = await _indexService.GetImageIndexAsync();
+        if (index is null)
+        {
+            _logger.LogError("No index found, cannot send image.");
+            // TODO Refresh index here
+            return;
+        }
+
+        var randomImage = index.Images.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
+
+        if (randomImage is null)
+        {
+            _logger.LogError("No images found in index");
+            return;
+        }
+
+        var result = await _imageService.GetImageStream(randomImage.Name);
+
         if (result is null)
         {
             _logger.LogError("No image found");
             return;
         }
-        await _discordImagePoster.SendImage(result.Value.Item2.Content, result.Value.Item1);
+        await _discordImagePoster.SendImage(result.Content, randomImage.Name);
+        randomImage.TimesPosted++;
+        await _indexService.UpdateIndexAsync(index);
     }
 }
