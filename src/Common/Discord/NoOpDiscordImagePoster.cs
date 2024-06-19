@@ -5,7 +5,7 @@ namespace DiscordImagePoster.Common.Discord;
 /// </summary>
 public class NoOpDiscordImagePoster : IDiscordImagePoster
 {
-    public Task SendImage(Stream stream, string fileName)
+    public Task SendImage(Stream stream, string fileName, string? description)
     {
         return Task.CompletedTask;
     }

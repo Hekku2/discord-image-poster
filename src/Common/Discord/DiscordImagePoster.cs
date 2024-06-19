@@ -16,9 +16,9 @@ public class DiscordImagePoster : IDiscordImagePoster
         _options = options.Value;
     }
 
-    public async Task SendImage(Stream stream, string fileName)
+    public async Task SendImage(Stream stream, string fileName, string? description)
     {
-        var file = new FileAttachment(stream, fileName, "File file true", false, true);
+        var file = new FileAttachment(stream, fileName, description, false, true);
         var embed = new EmbedBuilder { ImageUrl = $"attachment://{fileName}" }.Build();
 
         using var client = await GetAuthenticatedClient();
@@ -29,10 +29,10 @@ public class DiscordImagePoster : IDiscordImagePoster
         var textChannel = await GetCorrectChannelAsync(client);
         if (textChannel == null)
         {
-            _logger.LogError("Channel not found");
+            _logger.LogError("Channel {ChannelId} not found or it was not text channel.", _options.ChannelId);
             return;
         }
-        var sentMessage = await textChannel.SendFileAsync(file, null, false, embed: embed);
+        var sentMessage = await textChannel.SendFileAsync(file, fileName, false, embed: embed);
     }
 
     private async Task<DiscordRestClient> GetAuthenticatedClient()

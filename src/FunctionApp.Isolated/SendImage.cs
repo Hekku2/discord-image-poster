@@ -84,7 +84,7 @@ public class ImageSendFunction
             _logger.LogError("No image found");
             return;
         }
-        await _discordImagePoster.SendImage(result.Content, randomImage.Name);
+        await _discordImagePoster.SendImage(result.Content, randomImage.Name, randomImage.Description);
         randomImage.TimesPosted++;
         await _indexService.UpdateIndexAsync(index);
     }
