@@ -42,7 +42,7 @@ resource imageStorage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
 var imageSettings = {
   connectionString: 'DefaultEndpointsProtocol=https;AccountName=${imageStorage.name};EndpointSuffix=${az.environment().suffixes.storage};AccountKey=${imageStorage.listKeys().keys[0].value}'
   containerName: 'images'
-  folderPath: 'discordtest'
+  folderPath: 'root'
 }
 
 module functions 'functions.bicep' = {

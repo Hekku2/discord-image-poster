@@ -63,6 +63,7 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-02-01' = {
 
 var discordSettingsKey = 'DiscordConfiguration'
 var blobStorageKey = 'BlobStorageImageSourceOptions'
+var imageIndexStorageKey = 'ImageIndexOptions'
 
 resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
   kind: 'linux,functionapp'
@@ -134,6 +135,14 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
         {
           name: '${blobStorageKey}__FolderPath'
           value: imageStorageSettings.folderPath
+        }
+        {
+          name: '${imageIndexStorageKey}__ConnectionString'
+          value: imageStorageSettings.connectionString
+        }
+        {
+          name: '${imageIndexStorageKey}__ContainerName'
+          value: 'index'
         }
       ]
     }
