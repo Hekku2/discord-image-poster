@@ -9,10 +9,12 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $project = 'src/FunctionApp.Isolated'
-$publishFolder = 'src/output'
+$publishFolder = 'bin/publish'
 
-dotnet publish -o $publishFolder $project --version-suffix 'DEV'
+dotnet build --output $publishFolder $project --configuration Release
 
 $fullSourcePath = (Resolve-Path "$publishFolder").Path
 
-Compress-Archive -DestinationPath $ZipPath -Path "$fullSourcePath/*" -Force
+#Compress-Archive not used because it doesn't include hidden files (. -prefix)
+Remove-Item -Path $ZipPath -ErrorAction SilentlyContinue
+[System.IO.Compression.ZipFile]::CreateFromDirectory($fullSourcePath, $ZipPath) 

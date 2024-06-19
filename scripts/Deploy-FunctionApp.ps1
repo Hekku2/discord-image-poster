@@ -45,4 +45,3 @@ ForEach ($item in $config) {
 $newAppSettings['WEBSITE_RUN_FROM_PACKAGE'] = "https://$accountName.blob.core.windows.net/function-releases/$blobName"
 
 Set-AzWebApp -ResourceGroupName $ResourceGroup -Name $AppName -AppSettings $newAppSettings | Out-Null
-#func azure functionapp publish func-hjni-discord-image-poster

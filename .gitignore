@@ -401,3 +401,5 @@ FodyWeavers.xsd
 
 # Ignore .env file containing credentials
 .env
+developer-settings.json
+publish.zip

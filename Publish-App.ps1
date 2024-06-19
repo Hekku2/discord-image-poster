@@ -21,4 +21,4 @@ $settingsJson = Get-DeveloperSettings -SettingsFile $SettingsFile
 Write-Host 'Deploying function app...'
 $archivePath = Join-Path -Path (Resolve-Path ".\").Path -ChildPath 'publish.zip'
 .$PSScriptRoot/scripts/Build-Backend.ps1 -ZipPath $archivePath
-.$PSScriptRoot/scripts/Deploy-FunctionApp.ps1 -ResourceGroup $settingsJson.ResourceGroup -AppName "func-$($settingsJson.ResourceGroup)" -ZipFile $archivePath
+#.$PSScriptRoot/scripts/Deploy-FunctionApp.ps1 -ResourceGroup $settingsJson.ResourceGroup -AppName "func-$($settingsJson.ResourceGroup)" -ZipFile $archivePath
