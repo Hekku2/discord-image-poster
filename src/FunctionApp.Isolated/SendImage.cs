@@ -15,14 +15,14 @@ public class ImageSendFunction
     private readonly FeatureSettings _featureSettings;
     private readonly IDiscordImagePoster _discordImagePoster;
     private readonly IBlobStorageImageService _imageService;
-    private readonly IIndexService _indexService;
+    private readonly IIndexStorageService _indexService;
 
     public ImageSendFunction(
         ILogger<ImageSendFunction> logger,
         IOptions<FeatureSettings> featureSettings,
         IDiscordImagePoster discordImagePoster,
         IBlobStorageImageService imageService,
-        IIndexService indexService)
+        IIndexStorageService indexService)
     {
         _logger = logger;
         _featureSettings = featureSettings.Value;

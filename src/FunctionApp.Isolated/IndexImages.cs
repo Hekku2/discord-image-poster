@@ -9,10 +9,10 @@ namespace DiscordImagePoster.FunctionApp.Isolated;
 public class ImageIndexFunction
 {
     private readonly ILogger _logger;
-    private readonly IIndexService _indexService;
+    private readonly IIndexStorageService _indexService;
     private readonly IBlobStorageImageService _imageService;
 
-    public ImageIndexFunction(ILogger<ImageSendFunction> logger, IIndexService indexService, IBlobStorageImageService imageService)
+    public ImageIndexFunction(ILogger<ImageSendFunction> logger, IIndexStorageService indexService, IBlobStorageImageService imageService)
     {
         _logger = logger;
         _indexService = indexService;

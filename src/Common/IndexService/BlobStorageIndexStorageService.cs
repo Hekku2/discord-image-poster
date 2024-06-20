@@ -5,16 +5,16 @@ using Microsoft.Extensions.Logging;
 
 namespace DiscordImagePoster.Common.IndexService;
 
-public class BlobStorageIndexService : IIndexService
+public class BlobStorageIndexStorageService : IIndexStorageService
 {
-    private ILogger<BlobStorageIndexService> _logger;
+    private ILogger<BlobStorageIndexStorageService> _logger;
     private readonly BlobContainerClient _blobContainerClient;
 
     private const string IndexBlobName = "index.json";
 
-    public BlobStorageIndexService
+    public BlobStorageIndexStorageService
     (
-        ILogger<BlobStorageIndexService> logger,
+        ILogger<BlobStorageIndexStorageService> logger,
         [FromKeyedServices(KeyedServiceConstants.ImageIndexBlobContainerClient)] BlobContainerClient blobContainerClient
     )
     {
