@@ -15,6 +15,9 @@ dotnet build --output $publishFolder $project --configuration Release
 
 $fullSourcePath = (Resolve-Path "$publishFolder").Path
 
+# Remove local.settings.json
+Remove-Item -Path "$fullSourcePath/local.settings.json" -ErrorAction SilentlyContinue
+
 #Compress-Archive not used because it doesn't include hidden files (. -prefix)
 Remove-Item -Path $ZipPath -ErrorAction SilentlyContinue
 [System.IO.Compression.ZipFile]::CreateFromDirectory($fullSourcePath, $ZipPath) 

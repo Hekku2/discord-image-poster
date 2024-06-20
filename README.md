@@ -1,10 +1,21 @@
 # Discord Image Poster
-A bot which posts a random image to discord channel from Azure Storage.
+
+A bot which posts periodically a random image to discord channel from Azure
+Storage.
+
+Currently this is designed to work with one server and one channel.
 
 ## Deployment and running
 
 Following section describes what needs be done to deploy and run this
-application.
+application. Instructions are still WIP, proper documentation and scripts can
+be provided later.
+
+This service can be run in following ways
+
+1. Local, without container. (Azure Core Tools, `func start`)
+2. Local, with container (docker compose)
+3. From Azure (the intended way for production)
 
 ### Configuration
 
@@ -25,9 +36,42 @@ Not sure if there is an easier way, but the current way is to call following url
   * Permission 2048 is "Send Messages"
   * Other combinations can be checked from `https://discord.com/developers/applications/<id here>/bot`
 
+### Running locally with Azure Core Tools
+
+This requires Azurite or proper Azure Storage to function correctly.
+
+Settings are read from `local.settings.json` which needs to be generated.
+
+Example:
+
+```json
+{
+    "IsEncrypted": false,
+    "Values": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+        "DiscordOptions__Token": "token here",
+        "DiscordOptions__GuildId": "server id here",
+        "DiscordOptions__ChannelId": "channel id here",
+        "BlobStorageImageSourceOptions__ConnectionString": "DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://local.storage.emulator:10000/devstoreaccount1;QueueEndpoint=http://local.storage.emulator:10001/devstoreaccount1;",
+        "BlobStorageImageSourceOptions__ContainerName": "images",
+        "BlobStorageImageSourceOptions__FolderPath": "testfolder"
+    }
+}
+
+```
+
+To start
+
+```bash
+cd ./src/FunctionApp.Isolated/
+func start
+```
+
 ### Running locally in container
+
 Preparation
- 1. Create developer-settings.json (based on developer-settings-sample.json)
+ 1. Create `developer-settings.json` (based on developer-settings-sample.json)
  1. Create .env file for docker compose
 
 ```bash
@@ -43,7 +87,7 @@ Then call `http://localhost:8080/api/SendImage?code=mock-secret-for-local-testin
 ### Running in Azure
 
 Preparation
- 1. Create developer-settings.json (based on developer-settings-sample.json)
+ 1. Create `developer-settings.json` (based on developer-settings-sample.json)
 
 ```bash
 ./Create-Environment.ps1

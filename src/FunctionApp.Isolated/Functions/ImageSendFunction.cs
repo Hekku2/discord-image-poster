@@ -15,14 +15,14 @@ public class ImageSendFunction
     private readonly FeatureSettings _featureSettings;
     private readonly IDiscordImagePoster _discordImagePoster;
     private readonly IBlobStorageImageService _imageService;
-    private readonly IIndexStorageService _indexService;
+    private readonly IIndexService _indexService;
 
     public ImageSendFunction(
         ILogger<ImageSendFunction> logger,
         IOptions<FeatureSettings> featureSettings,
         IDiscordImagePoster discordImagePoster,
         IBlobStorageImageService imageService,
-        IIndexStorageService indexService)
+        IIndexService indexService)
     {
         _logger = logger;
         _featureSettings = featureSettings.Value;
@@ -61,31 +61,22 @@ public class ImageSendFunction
 
     private async Task SendRandomImage()
     {
-        var index = await _indexService.GetImageIndexAsync();
-        if (index is null)
-        {
-            _logger.LogError("No index found, cannot send image.");
-            // TODO Refresh index here
-            return;
-        }
-
+        var index = await _indexService.GetIndexOrCreateNew();
         var randomImage = index.Images.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
 
         if (randomImage is null)
         {
-            _logger.LogError("No images found in index");
+            _logger.LogError("No images found in index.");
             return;
         }
 
         var result = await _imageService.GetImageStream(randomImage.Name);
-
         if (result is null)
         {
             _logger.LogError("No image found");
             return;
         }
         await _discordImagePoster.SendImage(result.Content, randomImage.Name, randomImage.Description);
-        randomImage.TimesPosted++;
-        await _indexService.UpdateIndexAsync(index);
+        await _indexService.IncreasePostingCountAsync(randomImage.Name);
     }
 }
