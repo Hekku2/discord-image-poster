@@ -14,10 +14,10 @@ var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
     .ConfigureServices(services =>
     {
-        services.AddOptions<BlobStorageImageSourceOptions>().BindConfiguration(nameof(BlobStorageImageSourceOptions));
-        services.AddOptions<DiscordConfiguration>().BindConfiguration(nameof(DiscordConfiguration));
-        services.AddOptions<FeatureSettings>().BindConfiguration(nameof(FeatureSettings));
-        services.AddOptions<ImageIndexOptions>().BindConfiguration(nameof(ImageIndexOptions));
+        services.AddOptions<BlobStorageImageSourceOptions>().BindConfiguration(nameof(BlobStorageImageSourceOptions)).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<DiscordConfiguration>().BindConfiguration(nameof(DiscordConfiguration)).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<FeatureSettings>().BindConfiguration(nameof(FeatureSettings)).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<ImageIndexOptions>().BindConfiguration(nameof(ImageIndexOptions)).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddTransient<IDiscordImagePoster>(services =>
         {
