@@ -16,10 +16,16 @@ public class RandomizationService : IRandomizationService
     {
         _logger.LogTrace("Getting random image from image index.");
 
-        var allowedImages = imageIndex.Images.Where(x => !x.Ignore);
-        var minimunPosts = allowedImages.Min(x => x.TimesPosted);
-        var imagesInPostingRange = allowedImages.Where(x => x.TimesPosted == minimunPosts).ToList();
-
-        return imagesInPostingRange.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
+        var allowedImages = imageIndex.Images.Where(image => !image.Ignore);
+        if (!allowedImages.Any())
+        {
+            _logger.LogTrace("No allowed images found in index.");
+            return null;
+        }
+        var minimunPosts = allowedImages.Min(image => image.TimesPosted);
+        return allowedImages
+            .Where(image => image.TimesPosted == minimunPosts)
+            .OrderBy(x => Guid.NewGuid())
+            .FirstOrDefault();
     }
 }
