@@ -2,6 +2,7 @@ using System.Net;
 using DiscordImagePoster.Common.BlobStorageImageService;
 using DiscordImagePoster.Common.Discord;
 using DiscordImagePoster.Common.IndexService;
+using DiscordImagePoster.Common.RandomizationService;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -16,19 +17,23 @@ public class ImageSendFunction
     private readonly IDiscordImagePoster _discordImagePoster;
     private readonly IBlobStorageImageService _imageService;
     private readonly IIndexService _indexService;
+    private readonly IRandomizationService _randomizationService;
 
     public ImageSendFunction(
         ILogger<ImageSendFunction> logger,
         IOptions<FeatureSettings> featureSettings,
         IDiscordImagePoster discordImagePoster,
         IBlobStorageImageService imageService,
-        IIndexService indexService)
+        IIndexService indexService,
+        IRandomizationService randomizationService
+        )
     {
         _logger = logger;
         _featureSettings = featureSettings.Value;
         _discordImagePoster = discordImagePoster;
         _imageService = imageService;
         _indexService = indexService;
+        _randomizationService = randomizationService;
     }
 
     [Function("SendImage")]
@@ -62,7 +67,7 @@ public class ImageSendFunction
     private async Task SendRandomImage()
     {
         var index = await _indexService.GetIndexOrCreateNew();
-        var randomImage = index.Images.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
+        var randomImage = _randomizationService.GetRandomImage(index);
 
         if (randomImage is null)
         {
