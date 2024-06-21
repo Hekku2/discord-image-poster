@@ -12,9 +12,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - AzureWebJobsStorage=AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=https;BlobEndpoint=http://azurite:local.storage.emulator/devstoreaccount1;QueueEndpoint=http://local.storage.emulator:10001/devstoreaccount1;TableEndpoint=http://local.storage.emulator:10002/devstoreaccount1;
       - AzureWebJobsSecretStorageType=files
-      - DiscordOptions__Token=${DISCORD_TOKEN}
-      - DiscordOptions__GuildId=${DISCORD_GUILDID}
-      - DiscordOptions__ChannelId=${DISCORD_CHANNELID}
+      - DiscordConfiguration__Token=${DISCORD_TOKEN}
+      - DiscordConfiguration__GuildId=${DISCORD_GUILDID}
+      - DiscordConfiguration__ChannelId=${DISCORD_CHANNELID}
       - BlobStorageImageSourceOptions__ConnectionString=DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://local.storage.emulator:10000/devstoreaccount1;QueueEndpoint=http://local.storage.emulator:10001/devstoreaccount1;
       - BlobStorageImageSourceOptions__ContainerName=images
       - BlobStorageImageSourceOptions__FolderPath=testfolder
@@ -32,6 +32,6 @@ services:
     container_name: local.storage.emulator
     command: azurite --loose --disableProductStyleUrl --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --location /workspace --debug /workspace/debug.log
     ports:
-        - 10000:10000
-        - 10001:10001
-        - 10002:10002
+      - 10000:10000
+      - 10001:10001
+      - 10002:10002
