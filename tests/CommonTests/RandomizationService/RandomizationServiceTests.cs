@@ -59,4 +59,29 @@ public class RandomizationServiceTests
 
         result.Should().BeNull();
     }
+
+    [Test]
+    public void GetRandomImage_ForSomeImage_ReturnsImage()
+    {
+        var imageIndex = new ImageIndex()
+        {
+            RefreshedAt = DateTimeOffset.UtcNow,
+            Images = new List<ImageIndexMetadata>
+            {
+                new ImageIndexMetadata
+                {
+                    Ignore = false,
+                    AddedAt = DateTime.UtcNow,
+                    Description = null,
+                    LastPostedAt = null,
+                    TimesPosted = 27,
+                    Name = "Test Image"
+                }
+            }
+        };
+
+        var result = _randomizationService.GetRandomImage(imageIndex);
+
+        result.Should().BeEquivalentTo(imageIndex.Images.First());
+    }
 }

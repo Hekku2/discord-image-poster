@@ -23,6 +23,7 @@ public class RandomizationService : IRandomizationService
             return null;
         }
         var minimunPosts = allowedImages.Min(image => image.TimesPosted);
+        _logger.LogTrace("Minimum posts for allowed images: {MinimunPosts}", minimunPosts);
         return allowedImages
             .Where(image => image.TimesPosted == minimunPosts)
             .OrderBy(x => Guid.NewGuid())
