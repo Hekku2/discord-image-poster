@@ -29,6 +29,7 @@ var host = new HostBuilder()
 
         services.AddTransient<IBlobStorageImageService, BlobStorageImageService>();
         services.AddTransient<IIndexStorageService, BlobStorageIndexStorageService>();
+        services.AddTransient<IIndexService, IndexService>();
 
         services.AddKeyedTransient(KeyedServiceConstants.ImageBlobContainerClient, (services, _) =>
         {
