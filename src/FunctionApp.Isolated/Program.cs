@@ -3,6 +3,7 @@ using DiscordImagePoster.Common;
 using DiscordImagePoster.Common.BlobStorageImageService;
 using DiscordImagePoster.Common.Discord;
 using DiscordImagePoster.Common.IndexService;
+using DiscordImagePoster.Common.RandomizationService;
 using DiscordImagePoster.FunctionApp.Isolated;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,6 +31,7 @@ var host = new HostBuilder()
         services.AddTransient<IBlobStorageImageService, BlobStorageImageService>();
         services.AddTransient<IIndexStorageService, BlobStorageIndexStorageService>();
         services.AddTransient<IIndexService, IndexService>();
+        services.AddTransient<IRandomizationService, RandomizationService>();
 
         services.AddKeyedTransient(KeyedServiceConstants.ImageBlobContainerClient, (services, _) =>
         {
