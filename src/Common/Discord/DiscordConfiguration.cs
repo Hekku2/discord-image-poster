@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace DiscordImagePoster.Common.Discord;
 
 /// <summary>
@@ -10,6 +12,8 @@ public class DiscordConfiguration
     /// The token of the bot. This is used to authenticate the bot with the
     /// Discord API.
     /// </summary>
+    [Required]
+    [MinLength(1)]
     public required string Token { get; set; }
 
     /// <summary>
@@ -17,6 +21,7 @@ public class DiscordConfiguration
     /// This can be fetched from the Discord server url.
     /// For example, the ID of the guild in the url https://discord.com/channels/123123/666666 is 123123.
     /// </summary>
+    [Required]
     public ulong GuildId { get; set; }
 
     /// <summary>
@@ -24,5 +29,6 @@ public class DiscordConfiguration
     /// This can be fetched from the Discord server url.
     /// For example, the ID of the guild in the url https://discord.com/channels/123123/666666 is 666666.
     /// </summary>
+    [Required]
     public ulong ChannelId { get; set; }
 }

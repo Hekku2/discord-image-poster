@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace DiscordImagePoster.Common.BlobStorageImageService;
 
 public class BlobStorageImageSourceOptions
@@ -11,6 +13,7 @@ public class BlobStorageImageSourceOptions
     /// <summary>
     /// The name of the container where the images are stored.
     /// </summary>
+    [Required]
     public required string ContainerName { get; set; }
 
     /// <summary>

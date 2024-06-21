@@ -15,7 +15,7 @@ var host = new HostBuilder()
     .ConfigureServices(services =>
     {
         services.AddOptions<BlobStorageImageSourceOptions>().BindConfiguration(nameof(BlobStorageImageSourceOptions));
-        services.AddOptions<DiscordConfiguration>().BindConfiguration(nameof(DiscordConfiguration));
+        services.AddOptions<DiscordConfiguration>().BindConfiguration(nameof(DiscordConfiguration)).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<FeatureSettings>().BindConfiguration(nameof(FeatureSettings));
         services.AddOptions<ImageIndexOptions>().BindConfiguration(nameof(ImageIndexOptions));
 
