@@ -84,4 +84,40 @@ public class RandomizationServiceTests
 
         result.Should().BeEquivalentTo(imageIndex.Images.First());
     }
+
+    [Test]
+    public void GetRandomImage_TwoImages_ReturnsLessPostedImage()
+    {
+        var imageIndex = new ImageIndex()
+        {
+            RefreshedAt = DateTimeOffset.UtcNow,
+            Images = new List<ImageIndexMetadata>
+            {
+                new ImageIndexMetadata
+                {
+                    Ignore = false,
+                    AddedAt = DateTime.UtcNow,
+                    Description = null,
+                    LastPostedAt = null,
+                    TimesPosted = 27,
+                    Name = "Test Image 1"
+                },
+                new ImageIndexMetadata
+                {
+                    Ignore = false,
+                    AddedAt = DateTime.UtcNow,
+                    Description = null,
+                    LastPostedAt = null,
+                    TimesPosted = 25,
+                    Name = "Test Image 2"
+                }
+            }
+        };
+
+        for (var i = 0; i < 10; i++)
+        {
+            var result = _randomizationService.GetRandomImage(imageIndex);
+            result.Should().BeEquivalentTo(imageIndex.Images.Last());
+        }
+    }
 }
