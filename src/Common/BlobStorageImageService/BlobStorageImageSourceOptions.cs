@@ -2,6 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DiscordImagePoster.Common.BlobStorageImageService;
 
+/// <summary>
+/// Settings for the Azure Blob Storage which hosts the images.
+/// This is used to fetch images from the storage account.
+/// </summary>
 public class BlobStorageImageSourceOptions
 {
     /// <summary>
