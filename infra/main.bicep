@@ -12,6 +12,9 @@ param location string = resourceGroup().location
 @description('Web site package location. Leave empty if none is found.')
 param webSitePackageLocation string = ''
 
+@description('If true, messages are not sent to Discord. This should only be used when testing.')
+param disableDiscordSending bool = false
+
 module appInsights 'app-insights.bicep' = {
   name: 'application-insights'
   params: {
@@ -54,5 +57,6 @@ module functions 'functions.bicep' = {
     discordSettings: discordSettings
     imageStorageSettings: imageSettings
     webSitePackageLocation: webSitePackageLocation
+    disableDiscordSending: disableDiscordSending
   }
 }

@@ -18,6 +18,9 @@ param location string = resourceGroup().location
 @description('Web site package location. Leave empty if none is found.')
 param webSitePackageLocation string = ''
 
+@description('If true, messages are not sent to Discord. This should only be used when testing.')
+param disableDiscordSending bool = false
+
 var hostingPlanName = 'asp-${baseName}'
 var functionAppName = 'func-${baseName}'
 var storageBlobDataOwnerRoleDefinitionId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
@@ -111,6 +114,10 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: reference(applicationInsights.id, '2015-05-01').InstrumentationKey
+        }
+        {
+          name: 'FeatureSettings__DisableDiscordSending'
+          value: '${disableDiscordSending}'
         }
         {
           name: '${discordSettingsKey}__Token'
