@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Identity.Client;
 
 namespace DiscordImagePoster.Common.BlobStorageImageService;
 
@@ -17,8 +18,15 @@ public class BlobStorageImageSourceOptions
     /// <summary>
     /// The name of the container where the images are stored.
     /// </summary>
-    [Required]
-    public required string ContainerName { get; set; }
+    public required string? ContainerName { get; set; }
+
+    /// <summary>
+    /// The URI to the container where the images are stored.
+    /// https://{account_name}.blob.core.windows.net/{container_name}
+    /// 
+    /// If this is used, the ConnectionString is not needed and managed identity is used
+    /// </summary>
+    public required string? BlobContainerUri { get; set; }
 
     /// <summary>
     /// The path to the folder where the images are stored.

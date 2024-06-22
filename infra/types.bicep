@@ -7,7 +7,7 @@ type DiscordSettings = {
 
 @export()
 type ImageStorageSettings = {
+  blobContainerUri: string
   connectionString: string
-  containerName: string
   folderPath: string
 }

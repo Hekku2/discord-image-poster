@@ -89,7 +89,11 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
       use32BitWorkerProcess: false
       ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'
-
+      cors: {
+        allowedOrigins: [
+          'https://portal.azure.com'
+        ]
+      }
       appSettings: [
         {
           name: 'AzureWebJobsStorage__accountName'
@@ -132,12 +136,8 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
           value: '${discordSettings.channelId}'
         }
         {
-          name: '${blobStorageKey}__ConnectionString'
-          value: imageStorageSettings.connectionString
-        }
-        {
-          name: '${blobStorageKey}__ContainerName'
-          value: imageStorageSettings.containerName
+          name: '${blobStorageKey}__BlobContainerUri'
+          value: imageStorageSettings.blobContainerUri
         }
         {
           name: '${blobStorageKey}__FolderPath'
@@ -170,3 +170,4 @@ resource functionAppFunctionBlobStorageAccess 'Microsoft.Authorization/roleAssig
 }
 
 output functionAppPrincipalId string = functionApp.identity.principalId
+output functionAppResourceId string = functionApp.id
