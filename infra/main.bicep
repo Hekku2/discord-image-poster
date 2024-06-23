@@ -54,8 +54,7 @@ resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@20
 }
 
 var imageSettings = {
-  connectionString: 'DefaultEndpointsProtocol=https;AccountName=${imageStorage.name};EndpointSuffix=${az.environment().suffixes.storage};AccountKey=${imageStorage.listKeys().keys[0].value}'
-  blobContainerUri: '${imageStorage.properties.primaryEndpoints.blob}/${imageContainerName}'
+  blobContainerUri: '${imageStorage.properties.primaryEndpoints.blob}${imageContainerName}'
   folderPath: 'root'
 }
 
@@ -72,18 +71,17 @@ module functions 'functions.bicep' = {
   }
 }
 
-// TODO refactor this. this should only require reading permission. Image INDEX requires more permissions and currently these are in same place
 // TODO Also this assignment could probably be a separate module etc.
-var storageBlobDataOwnerRoleDefinitionId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
+var storageBlobDataReaderRoleDefinitionId = '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
 resource functionAppFunctionBlobStorageAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: imageStorage
-  name: guid(functions.name, storageBlobDataOwnerRoleDefinitionId, imageStorage.id)
+  scope: container
+  name: guid(functions.name, storageBlobDataReaderRoleDefinitionId, container.id)
   properties: {
     principalId: functions.outputs.functionAppPrincipalId
     principalType: 'ServicePrincipal'
     roleDefinitionId: subscriptionResourceId(
       'Microsoft.Authorization/roleDefinitions',
-      storageBlobDataOwnerRoleDefinitionId
+      storageBlobDataReaderRoleDefinitionId
     )
   }
 }

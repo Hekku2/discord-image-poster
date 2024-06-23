@@ -144,12 +144,8 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
           value: imageStorageSettings.folderPath
         }
         {
-          name: '${imageIndexStorageKey}__ConnectionString'
-          value: imageStorageSettings.connectionString
-        }
-        {
-          name: '${imageIndexStorageKey}__ContainerName'
-          value: 'index'
+          name: '${imageIndexStorageKey}__BlobContainerUri'
+          value: '${functionStorageAccount.properties.primaryEndpoints.blob}index'
         }
       ]
     }

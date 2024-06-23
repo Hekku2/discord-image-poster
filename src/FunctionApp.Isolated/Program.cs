@@ -36,7 +36,6 @@ var host = new HostBuilder()
 
         services.AddKeyedTransient(KeyedServiceConstants.ImageBlobContainerClient, (services, _) =>
         {
-            //https://{account_name}.blob.core.windows.net/{container_name}
             var options = services.GetRequiredService<IOptions<BlobStorageImageSourceOptions>>().Value;
             if (!string.IsNullOrWhiteSpace(options.BlobContainerUri))
             {
@@ -48,6 +47,10 @@ var host = new HostBuilder()
         services.AddKeyedTransient(KeyedServiceConstants.ImageIndexBlobContainerClient, (services, _) =>
         {
             var options = services.GetRequiredService<IOptions<ImageIndexOptions>>().Value;
+            if (!string.IsNullOrWhiteSpace(options.BlobContainerUri))
+            {
+                return new BlobContainerClient(new Uri(options.BlobContainerUri), new DefaultAzureCredential());
+            }
             return new BlobContainerClient(options.ConnectionString, options.ContainerName);
         });
 

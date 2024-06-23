@@ -2,29 +2,32 @@ using System.Text.Json;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DiscordImagePoster.Common.IndexService;
 
 public class BlobStorageIndexStorageService : IIndexStorageService
 {
-    private ILogger<BlobStorageIndexStorageService> _logger;
+    private readonly ILogger<BlobStorageIndexStorageService> _logger;
+    private readonly ImageIndexOptions _options;
     private readonly BlobContainerClient _blobContainerClient;
-
-    private const string IndexBlobName = "index.json";
 
     public BlobStorageIndexStorageService
     (
         ILogger<BlobStorageIndexStorageService> logger,
+        IOptions<ImageIndexOptions> options,
         [FromKeyedServices(KeyedServiceConstants.ImageIndexBlobContainerClient)] BlobContainerClient blobContainerClient
     )
     {
         _logger = logger;
+        _options = options.Value;
         _blobContainerClient = blobContainerClient;
     }
 
     public async Task<ImageIndex?> GetImageIndexAsync()
     {
-        var blobClient = _blobContainerClient.GetBlobClient(IndexBlobName);
+        _logger.LogTrace("Getting image index from {IndexFileName}", _options.IndexFileName);
+        var blobClient = _blobContainerClient.GetBlobClient(_options.IndexFileName);
         var exists = await blobClient.ExistsAsync();
         if (!exists)
         {
@@ -38,9 +41,10 @@ public class BlobStorageIndexStorageService : IIndexStorageService
 
     public async Task UpdateIndexAsync(ImageIndex index)
     {
+        _logger.LogTrace("Updating image index to {IndexFileName}", _options.IndexFileName);
         await _blobContainerClient.CreateIfNotExistsAsync();
         var bytes = JsonSerializer.SerializeToUtf8Bytes(index);
-        var blobClient = _blobContainerClient.GetBlobClient(IndexBlobName);
+        var blobClient = _blobContainerClient.GetBlobClient(_options.IndexFileName);
         await blobClient.UploadAsync(new MemoryStream(bytes), true);
     }
 }

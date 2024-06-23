@@ -17,6 +17,7 @@ public class BlobStorageImageSourceOptions
 
     /// <summary>
     /// The name of the container where the images are stored.
+    /// This is not needed (nor used) if BlobContainerUri is used.
     /// </summary>
     public required string? ContainerName { get; set; }
 
