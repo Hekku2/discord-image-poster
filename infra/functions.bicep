@@ -18,6 +18,9 @@ param location string = resourceGroup().location
 @description('Web site package location. Leave empty if none is found.')
 param webSitePackageLocation string = ''
 
+@description('If true, messages are not sent to Discord. This should only be used when testing.')
+param disableDiscordSending bool = false
+
 var hostingPlanName = 'asp-${baseName}'
 var functionAppName = 'func-${baseName}'
 var storageBlobDataOwnerRoleDefinitionId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
@@ -86,7 +89,11 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
       use32BitWorkerProcess: false
       ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'
-
+      cors: {
+        allowedOrigins: [
+          'https://portal.azure.com'
+        ]
+      }
       appSettings: [
         {
           name: 'AzureWebJobsStorage__accountName'
@@ -113,6 +120,10 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
           value: reference(applicationInsights.id, '2015-05-01').InstrumentationKey
         }
         {
+          name: 'FeatureSettings__DisableDiscordSending'
+          value: '${disableDiscordSending}'
+        }
+        {
           name: '${discordSettingsKey}__Token'
           value: discordSettings.token
         }
@@ -125,24 +136,16 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
           value: '${discordSettings.channelId}'
         }
         {
-          name: '${blobStorageKey}__ConnectionString'
-          value: imageStorageSettings.connectionString
-        }
-        {
-          name: '${blobStorageKey}__ContainerName'
-          value: imageStorageSettings.containerName
+          name: '${blobStorageKey}__BlobContainerUri'
+          value: imageStorageSettings.blobContainerUri
         }
         {
           name: '${blobStorageKey}__FolderPath'
           value: imageStorageSettings.folderPath
         }
         {
-          name: '${imageIndexStorageKey}__ConnectionString'
-          value: imageStorageSettings.connectionString
-        }
-        {
-          name: '${imageIndexStorageKey}__ContainerName'
-          value: 'index'
+          name: '${imageIndexStorageKey}__BlobContainerUri'
+          value: '${functionStorageAccount.properties.primaryEndpoints.blob}index'
         }
       ]
     }
@@ -163,3 +166,4 @@ resource functionAppFunctionBlobStorageAccess 'Microsoft.Authorization/roleAssig
 }
 
 output functionAppPrincipalId string = functionApp.identity.principalId
+output functionAppResourceId string = functionApp.id

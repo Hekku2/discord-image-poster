@@ -12,6 +12,9 @@ param location string = resourceGroup().location
 @description('Web site package location. Leave empty if none is found.')
 param webSitePackageLocation string = ''
 
+@description('If true, messages are not sent to Discord. This should only be used when testing.')
+param disableDiscordSending bool = false
+
 module appInsights 'app-insights.bicep' = {
   name: 'application-insights'
   params: {
@@ -39,9 +42,19 @@ resource imageStorage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
 }
 
+var imageContainerName = 'images'
+resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+  parent: imageStorage
+  name: 'default'
+}
+
+resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  parent: blobServices
+  name: imageContainerName
+}
+
 var imageSettings = {
-  connectionString: 'DefaultEndpointsProtocol=https;AccountName=${imageStorage.name};EndpointSuffix=${az.environment().suffixes.storage};AccountKey=${imageStorage.listKeys().keys[0].value}'
-  containerName: 'images'
+  blobContainerUri: '${imageStorage.properties.primaryEndpoints.blob}${imageContainerName}'
   folderPath: 'root'
 }
 
@@ -54,5 +67,21 @@ module functions 'functions.bicep' = {
     discordSettings: discordSettings
     imageStorageSettings: imageSettings
     webSitePackageLocation: webSitePackageLocation
+    disableDiscordSending: disableDiscordSending
+  }
+}
+
+// TODO Also this assignment could probably be a separate module etc.
+var storageBlobDataReaderRoleDefinitionId = '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+resource functionAppFunctionBlobStorageAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: container
+  name: guid(functions.name, storageBlobDataReaderRoleDefinitionId, container.id)
+  properties: {
+    principalId: functions.outputs.functionAppPrincipalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      storageBlobDataReaderRoleDefinitionId
+    )
   }
 }

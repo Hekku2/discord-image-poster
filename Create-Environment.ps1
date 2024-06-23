@@ -7,9 +7,13 @@
 
     .PARAMETER SettinsFile
     Settings file that contains environment settings. Defaults to 'developer-settings.json'
+
+    .PARAMETER NoDiscord
+    If set, discord sending is disabled. Useful for CI/CD and testing.
 #>
 param(
-    [Parameter()][string]$SettingsFile = 'developer-settings.json'
+    [Parameter()][string]$SettingsFile = 'developer-settings.json',
+    [Parameter()][switch]$NoDiscord
 )
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
@@ -20,7 +24,7 @@ Write-Host "Reading settings from file $SettingsFile"
 $settingsJson = Get-Content -Raw -Path $SettingsFile | ConvertFrom-Json
 
 Write-Host 'Checking if there is an existing installation...'
-$webSitePackageLocation = Get-AzWebApp -ResourceGroupName $settingsJson.ResourceGroup -Name "func-$($settingsJson.ApplicationName)" -ErrorAction SilentlyContinue | Get-WebSitePackage
+$webSitePackageLocation = Get-AzWebApp -ResourceGroupName $settingsJson.ResourceGroup -Name "func-$($settingsJson.ApplicationName)" -ErrorAction SilentlyContinue | Get-WebSitePackage -ErrorAction SilentlyContinue
 if ($webSitePackageLocation) {
     Write-Host "Function app already exist with website package, using it..."
 }
@@ -35,6 +39,7 @@ Write-Host 'Deploying template...'
 $parameters = @{
     baseName               = $settingsJson.ApplicationName
     webSitePackageLocation = $webSitePackageLocation
+    disableDiscordSending  = $NoDiscord ? $true : $false
     discordSettings        = @{
         token     = $settingsJson.DiscordToken
         channelId = $settingsJson.DiscordChannelId
