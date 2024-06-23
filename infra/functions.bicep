@@ -6,9 +6,6 @@ param baseName string
 @description('The name of the application insights to be used')
 param applicationInsightsName string
 
-@description('Settings for Discord bot.')
-param discordSettings DiscordSettings
-
 @description('Settings for image storage.')
 param imageStorageSettings ImageStorageSettings
 
@@ -21,12 +18,20 @@ param webSitePackageLocation string = ''
 @description('If true, messages are not sent to Discord. This should only be used when testing.')
 param disableDiscordSending bool = false
 
+@description('The name of the key vault that contains the secrets used by function app.')
+param keyVaultName string
+
 var hostingPlanName = 'asp-${baseName}'
 var functionAppName = 'func-${baseName}'
 var storageBlobDataOwnerRoleDefinitionId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: applicationInsightsName
+  scope: resourceGroup()
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+  name: keyVaultName
   scope: resourceGroup()
 }
 
@@ -125,15 +130,15 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
         }
         {
           name: '${discordSettingsKey}__Token'
-          value: discordSettings.token
+          value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=DiscordToken)'
         }
         {
           name: '${discordSettingsKey}__GuildId'
-          value: '${discordSettings.guildId}'
+          value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=DiscordGuildId)'
         }
         {
           name: '${discordSettingsKey}__ChannelId'
-          value: '${discordSettings.channelId}'
+          value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=DiscordChannelId)'
         }
         {
           name: '${blobStorageKey}__BlobContainerUri'

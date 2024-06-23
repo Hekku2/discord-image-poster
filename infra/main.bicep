@@ -23,6 +23,53 @@ module appInsights 'app-insights.bicep' = {
   }
 }
 
+var keyVaultName = replace('kv${baseName}', '-', '')
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: keyVaultName
+  location: location
+  properties: {
+    enableRbacAuthorization: true
+    enabledForDeployment: false
+    enabledForDiskEncryption: false
+    enabledForTemplateDeployment: false
+    tenantId: tenant().tenantId
+    enableSoftDelete: false
+    accessPolicies: []
+    sku: {
+      name: 'standard'
+      family: 'A'
+    }
+    networkAcls: {
+      defaultAction: 'Allow'
+      bypass: 'AzureServices'
+    }
+  }
+}
+
+resource discordSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'DiscordToken'
+  properties: {
+    value: discordSettings.token
+  }
+}
+
+resource discordGuild 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'DiscordGuildId'
+  properties: {
+    value: '${discordSettings.guildId}'
+  }
+}
+
+resource discordChannelId 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'DiscordChannelId'
+  properties: {
+    value: '${discordSettings.channelId}'
+  }
+}
+
 // Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only
 resource imageStorage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: substring(replace('stimages${baseName}', '-', ''), 0, 24)
@@ -64,7 +111,7 @@ module functions 'functions.bicep' = {
     applicationInsightsName: appInsights.outputs.applicationInsightsName
     location: location
     baseName: baseName
-    discordSettings: discordSettings
+    keyVaultName: keyVault.name
     imageStorageSettings: imageSettings
     webSitePackageLocation: webSitePackageLocation
     disableDiscordSending: disableDiscordSending
@@ -83,5 +130,16 @@ resource functionAppFunctionBlobStorageAccess 'Microsoft.Authorization/roleAssig
       'Microsoft.Authorization/roleDefinitions',
       storageBlobDataReaderRoleDefinitionId
     )
+  }
+}
+
+var secretUserRoleDefinitionId = '4633458b-17de-408a-b874-0445c86b69e6'
+resource functionAppFunctionKeyVaultAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: keyVault
+  name: guid(functions.name, secretUserRoleDefinitionId, keyVault.id)
+  properties: {
+    principalId: functions.outputs.functionAppPrincipalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', secretUserRoleDefinitionId)
   }
 }
