@@ -23,6 +23,11 @@ module appInsights 'app-insights.bicep' = {
   }
 }
 
+resource functionAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: 'id-${baseName}'
+  location: location
+}
+
 var keyVaultName = replace('kv${baseName}', '-', '')
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: keyVaultName
@@ -115,6 +120,7 @@ module functions 'functions.bicep' = {
     imageStorageSettings: imageSettings
     webSitePackageLocation: webSitePackageLocation
     disableDiscordSending: disableDiscordSending
+    identityName: functionAppIdentity.name
   }
 }
 
@@ -122,9 +128,9 @@ module functions 'functions.bicep' = {
 var storageBlobDataReaderRoleDefinitionId = '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
 resource functionAppFunctionBlobStorageAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: container
-  name: guid(functions.name, storageBlobDataReaderRoleDefinitionId, container.id)
+  name: guid(functionAppIdentity.id, storageBlobDataReaderRoleDefinitionId, container.id)
   properties: {
-    principalId: functions.outputs.functionAppPrincipalId
+    principalId: functionAppIdentity.properties.principalId
     principalType: 'ServicePrincipal'
     roleDefinitionId: subscriptionResourceId(
       'Microsoft.Authorization/roleDefinitions',
@@ -136,9 +142,9 @@ resource functionAppFunctionBlobStorageAccess 'Microsoft.Authorization/roleAssig
 var secretUserRoleDefinitionId = '4633458b-17de-408a-b874-0445c86b69e6'
 resource functionAppFunctionKeyVaultAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: keyVault
-  name: guid(functions.name, secretUserRoleDefinitionId, keyVault.id)
+  name: guid(functionAppIdentity.id, secretUserRoleDefinitionId, keyVault.id)
   properties: {
-    principalId: functions.outputs.functionAppPrincipalId
+    principalId: functionAppIdentity.properties.principalId
     principalType: 'ServicePrincipal'
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', secretUserRoleDefinitionId)
   }
