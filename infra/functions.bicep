@@ -6,9 +6,6 @@ param baseName string
 @description('The name of the application insights to be used')
 param applicationInsightsName string
 
-@description('Settings for Discord bot.')
-param discordSettings DiscordSettings
-
 @description('Settings for image storage.')
 param imageStorageSettings ImageStorageSettings
 
@@ -21,12 +18,28 @@ param webSitePackageLocation string = ''
 @description('If true, messages are not sent to Discord. This should only be used when testing.')
 param disableDiscordSending bool = false
 
+@description('The name of the key vault that contains the secrets used by function app.')
+param keyVaultName string
+
+@description('The name of the identity that will be used by the function app.')
+param identityName string
+
 var hostingPlanName = 'asp-${baseName}'
 var functionAppName = 'func-${baseName}'
 var storageBlobDataOwnerRoleDefinitionId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: applicationInsightsName
+  scope: resourceGroup()
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+  name: keyVaultName
+  scope: resourceGroup()
+}
+
+resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' existing = {
+  name: identityName
   scope: resourceGroup()
 }
 
@@ -68,7 +81,7 @@ var discordSettingsKey = 'DiscordConfiguration'
 var blobStorageKey = 'BlobStorageImageSourceOptions'
 var imageIndexStorageKey = 'ImageIndexOptions'
 
-resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
+resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   kind: 'linux,functionapp'
   name: functionAppName
   location: location
@@ -76,28 +89,41 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
     displayName: 'Function app'
   }
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${identity.id}': {}
+    }
   }
   properties: {
     reserved: true
     serverFarmId: hostingPlan.id
     httpsOnly: true
+    keyVaultReferenceIdentity: identity.id
     siteConfig: {
       defaultDocuments: []
       linuxFxVersion: 'DOTNET-ISOLATED|8.0'
       phpVersion: null
       use32BitWorkerProcess: false
-      ftpsState: 'FtpsOnly'
+      ftpsState: 'Disabled'
       minTlsVersion: '1.2'
       cors: {
         allowedOrigins: [
           'https://portal.azure.com'
         ]
       }
+      keyVaultReferenceIdentity: identity.id
       appSettings: [
         {
           name: 'AzureWebJobsStorage__accountName'
           value: functionStorageAccount.name
+        }
+        {
+          name: 'AzureWebJobsStorage__clientId'
+          value: identity.properties.clientId
+        }
+        {
+          name: 'AzureWebJobsStorage__credential'
+          value: 'managedidentity'
         }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
@@ -110,6 +136,14 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
           value: webSitePackageLocation
+        }
+        {
+          name: 'WEBSITE_RUN_FROM_PACKAGE_BLOB_MI_RESOURCE_ID'
+          value: identity.id
+        }
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: identity.properties.clientId
         }
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
@@ -125,15 +159,15 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
         }
         {
           name: '${discordSettingsKey}__Token'
-          value: discordSettings.token
+          value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=DiscordToken)'
         }
         {
           name: '${discordSettingsKey}__GuildId'
-          value: '${discordSettings.guildId}'
+          value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=DiscordGuildId)'
         }
         {
           name: '${discordSettingsKey}__ChannelId'
-          value: '${discordSettings.channelId}'
+          value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=DiscordChannelId)'
         }
         {
           name: '${blobStorageKey}__BlobContainerUri'
@@ -154,9 +188,9 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
 
 resource functionAppFunctionBlobStorageAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: functionStorageAccount
-  name: guid(functionApp.id, storageBlobDataOwnerRoleDefinitionId, functionStorageAccount.id)
+  name: guid(identity.id, storageBlobDataOwnerRoleDefinitionId, functionStorageAccount.id)
   properties: {
-    principalId: functionApp.identity.principalId
+    principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'
     roleDefinitionId: subscriptionResourceId(
       'Microsoft.Authorization/roleDefinitions',
@@ -165,5 +199,4 @@ resource functionAppFunctionBlobStorageAccess 'Microsoft.Authorization/roleAssig
   }
 }
 
-output functionAppPrincipalId string = functionApp.identity.principalId
 output functionAppResourceId string = functionApp.id

@@ -23,38 +23,50 @@ module appInsights 'app-insights.bicep' = {
   }
 }
 
-// Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only
-resource imageStorage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
-  name: substring(replace('stimages${baseName}', '-', ''), 0, 24)
+resource functionAppIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: 'id-${baseName}'
   location: location
-  kind: 'StorageV2'
-  sku: {
-    name: 'Standard_LRS'
-  }
-  tags: {
-    displayName: 'Storage for function app'
-  }
-  properties: {
-    allowBlobPublicAccess: false
-    minimumTlsVersion: 'TLS1_2'
-    supportsHttpsTrafficOnly: true
-    isHnsEnabled: true
+}
+
+module keyVaultModule 'key-vault.bicep' = {
+  name: 'key-vault'
+  params: {
+    location: location
+    baseName: baseName
+    secretUserRoleIdentities: [
+      functionAppIdentity.name
+    ]
+    secrets: [
+      {
+        key: 'DiscordToken'
+        value: discordSettings.token
+      }
+      {
+        key: 'DiscordGuildId'
+        value: '${discordSettings.guildId}'
+      }
+      {
+        key: 'DiscordChannelId'
+        value: '${discordSettings.channelId}'
+      }
+    ]
   }
 }
 
-var imageContainerName = 'images'
-resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
-  parent: imageStorage
-  name: 'default'
-}
-
-resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
-  parent: blobServices
-  name: imageContainerName
+module imageStorageModule 'image-storage.bicep' = {
+  name: 'image-storage'
+  params: {
+    location: location
+    baseName: baseName
+    imageContainerName: 'images'
+    imageReaderIdentities: [
+      functionAppIdentity.name
+    ]
+  }
 }
 
 var imageSettings = {
-  blobContainerUri: '${imageStorage.properties.primaryEndpoints.blob}${imageContainerName}'
+  blobContainerUri: imageStorageModule.outputs.blobContainerUri
   folderPath: 'root'
 }
 
@@ -64,24 +76,10 @@ module functions 'functions.bicep' = {
     applicationInsightsName: appInsights.outputs.applicationInsightsName
     location: location
     baseName: baseName
-    discordSettings: discordSettings
+    keyVaultName: keyVaultModule.outputs.keyVaultName
     imageStorageSettings: imageSettings
     webSitePackageLocation: webSitePackageLocation
     disableDiscordSending: disableDiscordSending
-  }
-}
-
-// TODO Also this assignment could probably be a separate module etc.
-var storageBlobDataReaderRoleDefinitionId = '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
-resource functionAppFunctionBlobStorageAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: container
-  name: guid(functions.name, storageBlobDataReaderRoleDefinitionId, container.id)
-  properties: {
-    principalId: functions.outputs.functionAppPrincipalId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId(
-      'Microsoft.Authorization/roleDefinitions',
-      storageBlobDataReaderRoleDefinitionId
-    )
+    identityName: functionAppIdentity.name
   }
 }

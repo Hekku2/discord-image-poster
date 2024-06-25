@@ -36,6 +36,11 @@ Azure Function App with dotnet-isolated runtime was chosen.
    * Supports Managed Identity
    * Can be activated periodically (`TimerTrigger`)
    * Supports containers for local development.
+* User Assigned Identity
+   * User Assigned identity was chosen because it solves the chicken-egg
+   -problem related to function app creation. If System Managed Identity would 
+   be used, we would need to do multi step initialization with function app,
+   storage RBAC, function app site settings, etc.
  * Isolated worker model
    * Chosen instead of In-process model, because In-Process support is ending.
  * Consumption mode for Function App
