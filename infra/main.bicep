@@ -70,6 +70,17 @@ var imageSettings = {
   folderPath: 'root'
 }
 
+module imageAnalyzerModule 'image-analyzer.bicep' = {
+  name: 'image-analyzer'
+  params: {
+    location: location
+    baseName: baseName
+    cognitiveServiceUserIdentityNames: [
+      functionAppIdentity.name
+    ]
+  }
+}
+
 module functions 'functions.bicep' = {
   name: 'functions'
   params: {
@@ -81,5 +92,6 @@ module functions 'functions.bicep' = {
     webSitePackageLocation: webSitePackageLocation
     disableDiscordSending: disableDiscordSending
     identityName: functionAppIdentity.name
+    cognitiveServicesAccountName: imageAnalyzerModule.outputs.cognitiveServiceAccountName
   }
 }

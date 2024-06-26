@@ -1,8 +1,10 @@
+using Azure.AI.Vision.ImageAnalysis;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using DiscordImagePoster.Common;
 using DiscordImagePoster.Common.BlobStorageImageService;
 using DiscordImagePoster.Common.Discord;
+using DiscordImagePoster.Common.ImageAnalysis;
 using DiscordImagePoster.Common.IndexService;
 using DiscordImagePoster.Common.RandomizationService;
 using DiscordImagePoster.FunctionApp.Isolated;
@@ -19,11 +21,21 @@ var host = new HostBuilder()
         services.AddOptions<DiscordConfiguration>().BindConfiguration(nameof(DiscordConfiguration)).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<FeatureSettings>().BindConfiguration(nameof(FeatureSettings)).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<ImageIndexOptions>().BindConfiguration(nameof(ImageIndexOptions)).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<ImageAnalysisConfiguration>().BindConfiguration(nameof(ImageAnalysisConfiguration)).ValidateDataAnnotations().ValidateOnStart();
+
+        services.AddTransient(services =>
+        {
+            var options = services.GetRequiredService<IOptions<ImageAnalysisConfiguration>>().Value;
+            return new ImageAnalysisClient(new Uri(options.Endpoint), new DefaultAzureCredential());
+        });
+        services.AddTransient<IImageAnalysisService, ImageAnalysisService>();
 
         services.AddTransient<IDiscordImagePoster>(services =>
         {
             var options = services.GetRequiredService<IOptions<FeatureSettings>>().Value;
-            return options.DisableDiscordSending ? new NoOpDiscordImagePoster() :
+            return options.DisableDiscordSending ?
+                new NoOpDiscordImagePoster(services.GetRequiredService<ILogger<NoOpDiscordImagePoster>>())
+                :
                 new DiscordImagePoster.Common.Discord.DiscordImagePoster(
                 services.GetRequiredService<ILogger<DiscordImagePoster.Common.Discord.DiscordImagePoster>>(),
                 services.GetRequiredService<IOptions<DiscordConfiguration>>());

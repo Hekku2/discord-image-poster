@@ -11,9 +11,14 @@ public class ImageIndexMetadata
     public required string Name { get; set; }
 
     /// <summary>
-    /// The description of the image.
+    /// The caption of the image.
     /// </summary>
-    public required string? Description { get; set; }
+    public string? Caption { get; set; }
+
+    /// <summary>
+    /// The tags of the image.
+    /// </summary>
+    public string[]? Tags { get; set; }
 
     /// <summary>
     /// The date when the image was added to the index.

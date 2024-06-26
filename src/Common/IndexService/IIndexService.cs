@@ -21,7 +21,8 @@ public interface IIndexService
     Task<ImageIndex> RefreshIndexAsync();
 
     /// <summary>
-    /// Increases the posting count for an image.
+    /// Increases the posting count for an image and updates image metadata.
     /// </summary>
-    Task IncreasePostingCountAsync(string imagePath);
+    /// <param name="imageMetadataUpdate">The image metadata update.</param>
+    Task IncreasePostingCountAndUpdateMetadataAsync(ImageMetadataUpdate imageMetadataUpdate);
 }
