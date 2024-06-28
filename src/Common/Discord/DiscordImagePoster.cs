@@ -32,7 +32,7 @@ public class DiscordImagePoster : IDiscordImagePoster
             _logger.LogError("Channel {ChannelId} not found or it was not text channel.", _options.ChannelId);
             return;
         }
-        var sentMessage = await textChannel.SendFileAsync(file, fileName, false, embed: embed);
+        var sentMessage = await textChannel.SendFileAsync(file, description ?? fileName, false, embed: embed);
     }
 
     private async Task<DiscordRestClient> GetAuthenticatedClient()
