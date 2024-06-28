@@ -39,9 +39,9 @@ public class IndexService : IIndexService
         return index;
     }
 
-    public async Task IncreasePostingCountAsync(string imagePath)
+    public async Task IncreasePostingCountAndUpdateMetadataAsync(ImageMetadataUpdate imageMetadataUpdate)
     {
-        _logger.LogDebug("Increasing posting count for {ImagePath}", imagePath);
+        _logger.LogDebug("Increasing posting count for {ImagePath}", imageMetadataUpdate.Name);
         var index = await _indexService.GetImageIndexAsync();
         if (index is null)
         {
@@ -49,17 +49,25 @@ public class IndexService : IIndexService
             index = await RefreshIndexAsync();
         }
 
-        var image = index.Images.FirstOrDefault(x => x.Name == imagePath);
+        var image = index.Images.FirstOrDefault(x => x.Name == imageMetadataUpdate.Name);
         if (image is null)
         {
-            _logger.LogWarning("Image {ImagePath} not found in index, adding.", imagePath);
-            image = CreateMetadata(imagePath);
+            _logger.LogWarning("Image {ImagePath} not found in index, adding.", imageMetadataUpdate.Name);
+            image = CreateMetadata(imageMetadataUpdate.Name);
             index.Images.Add(image);
         }
 
         _logger.LogTrace("Image was posted {TimesPosted} times before addition, it it was lasted posted at {LastPostedAt}", image.TimesPosted, image.LastPostedAt);
         image.TimesPosted++;
         image.LastPostedAt = DateTimeOffset.UtcNow;
+        if (imageMetadataUpdate.Caption is not null)
+        {
+            image.Caption = imageMetadataUpdate.Caption;
+        }
+        if (imageMetadataUpdate.Tags is not null)
+        {
+            image.Tags = imageMetadataUpdate.Tags;
+        }
         await _indexService.UpdateIndexAsync(index);
     }
 
@@ -82,22 +90,14 @@ public class IndexService : IIndexService
 
     private static void AddNewImagesToIndex(ImageIndex index, string[] allImages)
     {
-        foreach (string image in allImages)
+        foreach (var image in allImages)
         {
             if (index.Images.Any(x => x.Name == image))
             {
                 continue;
             }
 
-            index.Images.Add(new ImageIndexMetadata
-            {
-                Name = image,
-                Description = null,
-                AddedAt = DateTimeOffset.UtcNow,
-                TimesPosted = 0,
-                Ignore = false,
-                LastPostedAt = null,
-            });
+            index.Images.Add(CreateMetadata(image));
         }
     }
 
@@ -106,11 +106,12 @@ public class IndexService : IIndexService
         return new ImageIndexMetadata
         {
             Name = imagePath,
-            Description = null,
             AddedAt = DateTimeOffset.UtcNow,
             TimesPosted = 0,
             Ignore = false,
             LastPostedAt = null,
+            Caption = null,
+            Tags = null
         };
     }
 

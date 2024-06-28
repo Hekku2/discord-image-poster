@@ -24,6 +24,9 @@ param keyVaultName string
 @description('The name of the identity that will be used by the function app.')
 param identityName string
 
+@description('Cognitive services account name.')
+param cognitiveServicesAccountName string
+
 var hostingPlanName = 'asp-${baseName}'
 var functionAppName = 'func-${baseName}'
 var storageBlobDataOwnerRoleDefinitionId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
@@ -40,6 +43,11 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
 
 resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' existing = {
   name: identityName
+  scope: resourceGroup()
+}
+
+resource cognitiveServiceAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
+  name: cognitiveServicesAccountName
   scope: resourceGroup()
 }
 
@@ -80,6 +88,7 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-02-01' = {
 var discordSettingsKey = 'DiscordConfiguration'
 var blobStorageKey = 'BlobStorageImageSourceOptions'
 var imageIndexStorageKey = 'ImageIndexOptions'
+var imageAnalysisKey = 'ImageAnalysisConfiguration'
 
 resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   kind: 'linux,functionapp'
@@ -180,6 +189,10 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
         {
           name: '${imageIndexStorageKey}__BlobContainerUri'
           value: '${functionStorageAccount.properties.primaryEndpoints.blob}index'
+        }
+        {
+          name: '${imageAnalysisKey}__Endpoint'
+          value: cognitiveServiceAccount.properties.endpoint
         }
       ]
     }

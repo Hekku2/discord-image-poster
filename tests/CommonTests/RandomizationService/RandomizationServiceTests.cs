@@ -47,7 +47,8 @@ public class RandomizationServiceTests
                 {
                     Ignore = true,
                     AddedAt = DateTime.UtcNow,
-                    Description = null,
+                    Caption = null,
+                    Tags = null,
                     LastPostedAt = null,
                     TimesPosted = 0,
                     Name = "Test Image"
@@ -72,7 +73,8 @@ public class RandomizationServiceTests
                 {
                     Ignore = false,
                     AddedAt = DateTime.UtcNow,
-                    Description = null,
+                    Caption = null,
+                    Tags = null,
                     LastPostedAt = null,
                     TimesPosted = 27,
                     Name = "Test Image"
@@ -97,7 +99,8 @@ public class RandomizationServiceTests
                 {
                     Ignore = false,
                     AddedAt = DateTime.UtcNow,
-                    Description = null,
+                    Caption = null,
+                    Tags = null,
                     LastPostedAt = null,
                     TimesPosted = 27,
                     Name = "Test Image 1"
@@ -106,7 +109,8 @@ public class RandomizationServiceTests
                 {
                     Ignore = false,
                     AddedAt = DateTime.UtcNow,
-                    Description = null,
+                    Caption = null,
+                    Tags = null,
                     LastPostedAt = null,
                     TimesPosted = 25,
                     Name = "Test Image 2"

@@ -1,6 +1,7 @@
 using System.Net;
 using DiscordImagePoster.Common.BlobStorageImageService;
 using DiscordImagePoster.Common.Discord;
+using DiscordImagePoster.Common.ImageAnalysis;
 using DiscordImagePoster.Common.IndexService;
 using DiscordImagePoster.Common.RandomizationService;
 using Microsoft.Azure.Functions.Worker;
@@ -18,6 +19,7 @@ public class ImageSendFunction
     private readonly IBlobStorageImageService _imageService;
     private readonly IIndexService _indexService;
     private readonly IRandomizationService _randomizationService;
+    private readonly IImageAnalysisService _imageAnalysisService;
 
     public ImageSendFunction(
         ILogger<ImageSendFunction> logger,
@@ -25,7 +27,8 @@ public class ImageSendFunction
         IDiscordImagePoster discordImagePoster,
         IBlobStorageImageService imageService,
         IIndexService indexService,
-        IRandomizationService randomizationService
+        IRandomizationService randomizationService,
+        IImageAnalysisService imageAnalysisService
         )
     {
         _logger = logger;
@@ -34,6 +37,7 @@ public class ImageSendFunction
         _imageService = imageService;
         _indexService = indexService;
         _randomizationService = randomizationService;
+        _imageAnalysisService = imageAnalysisService;
     }
 
     [Function("SendImage")]
@@ -81,7 +85,17 @@ public class ImageSendFunction
             _logger.LogError("No image found");
             return;
         }
-        await _discordImagePoster.SendImage(result.Content, randomImage.Name, randomImage.Description);
-        await _indexService.IncreasePostingCountAsync(randomImage.Name);
+
+        var analyzationResults = await _imageAnalysisService.AnalyzeImageAsync(result.Content);
+        var imageMetadata = new ImageMetadataUpdate
+        {
+            Name = randomImage.Name,
+            Caption = analyzationResults.Caption,
+            Tags = analyzationResults.Tags
+        };
+
+        await _discordImagePoster.SendImage(result.Content, randomImage.Name, analyzationResults.Caption);
+
+        await _indexService.IncreasePostingCountAndUpdateMetadataAsync(imageMetadata);
     }
 }
