@@ -86,7 +86,10 @@ public class ImageSendFunction
             return;
         }
 
-        var analyzationResults = await _imageAnalysisService.AnalyzeImageAsync(result.Content);
+        var binaryData = BinaryData.FromStream(result.Content);
+        var analyzationResults = await _imageAnalysisService.AnalyzeImageAsync(binaryData.ToStream());
+
+        _logger.LogInformation("Sending image {ImageName} with caption {Caption} and tags {Tags}", randomImage.Name, analyzationResults.Caption, string.Join(", ", analyzationResults.Tags));
         var imageMetadata = new ImageMetadataUpdate
         {
             Name = randomImage.Name,
@@ -94,7 +97,7 @@ public class ImageSendFunction
             Tags = analyzationResults.Tags
         };
 
-        await _discordImagePoster.SendImage(result.Content, randomImage.Name, analyzationResults.Caption);
+        await _discordImagePoster.SendImage(binaryData.ToStream(), randomImage.Name, analyzationResults.Caption);
 
         await _indexService.IncreasePostingCountAndUpdateMetadataAsync(imageMetadata);
     }
