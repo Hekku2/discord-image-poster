@@ -1,4 +1,4 @@
-name: Build and test infrastructure
+name: Build and Test Infrastructure
 
 on: workflow_dispatch
   
@@ -25,8 +25,8 @@ jobs:
       run: |
         $settingsPath = Join-Path -Path (Resolve-Path ".\").Path -ChildPath 'test-infra-settings.json'
         $settings = @{
-          ResourceGroup = $env:GITHUB_RUN_ID
-          ApplicationName = $env:GITHUB_RUN_ID
+          ResourceGroup = "discord-image-iactest-$($env:GITHUB_RUN_ID)"
+          ApplicationName = "discord-image-iactest-$($env:GITHUB_RUN_ID)"
           Location = "North Europe"
           DiscordToken = 'mock token'
           DiscordGuildId = 0
@@ -35,4 +35,5 @@ jobs:
           ExistingCognitiveServicesResourceGroup = "hjni-discord-image-poster"
         }
         $settings | ConvertTo-Json | Set-Content -Path $settingsPath
-        echo ($settings | ConvertTo-Json)
+
+        ./Create-Environment.ps1 -SettingsFile $settingsPath -NoDiscord
