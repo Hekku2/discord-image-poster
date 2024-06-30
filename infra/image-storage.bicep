@@ -17,8 +17,9 @@ resource identities 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31
   }
 ]
 
+var storageName = replace('stimages${baseName}', '-', '')
 resource imageStorage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
-  name: substring(replace('stimages${baseName}', '-', ''), 0, 24)
+  name: substring(storageName, 0, min(length(storageName), 24))
   location: location
   kind: 'StorageV2'
   sku: {

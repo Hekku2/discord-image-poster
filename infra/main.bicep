@@ -1,4 +1,4 @@
-import { DiscordSettings, ImageStorageSettings } from 'types.bicep'
+import { DiscordSettings, ImageStorageSettings, CognitiveServiceSettings } from 'types.bicep'
 
 @description('Base of the name for all resources.')
 param baseName string
@@ -14,6 +14,9 @@ param webSitePackageLocation string = ''
 
 @description('If true, messages are not sent to Discord. This should only be used when testing.')
 param disableDiscordSending bool = false
+
+@description('Settings for deciding which CognitiveService resource is used.')
+param cognitiveService CognitiveServiceSettings
 
 module appInsights 'app-insights.bicep' = {
   name: 'application-insights'
@@ -70,14 +73,13 @@ var imageSettings = {
   folderPath: 'root'
 }
 
-module imageAnalyzerModule 'image-analyzer.bicep' = {
-  name: 'image-analyzer'
+module imageAnalyzerResolverModule 'image-analyzer-resolver.bicep' = {
+  name: 'image-analyzer-resolver'
   params: {
-    location: location
     baseName: baseName
-    cognitiveServiceUserIdentityNames: [
-      functionAppIdentity.name
-    ]
+    location: location
+    cognitiveService: cognitiveService
+    cognitiveServiceUserIdentityName: functionAppIdentity.name
   }
 }
 
@@ -92,6 +94,7 @@ module functions 'functions.bicep' = {
     webSitePackageLocation: webSitePackageLocation
     disableDiscordSending: disableDiscordSending
     identityName: functionAppIdentity.name
-    cognitiveServicesAccountName: imageAnalyzerModule.outputs.cognitiveServiceAccountName
+    cognitiveServicesAccountName: imageAnalyzerResolverModule.outputs.cognitiveServiceAccountName
+    cognitiveServicesAccountResourceGroup: imageAnalyzerResolverModule.outputs.cognitiveServiceResourceGroup
   }
 }

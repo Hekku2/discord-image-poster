@@ -6,9 +6,9 @@ namespace DiscordImagePoster.Common.ImageAnalysis;
 public interface IImageAnalysisService
 {
     /// <summary>
-    /// Analyzes the image in stream.
+    /// Analyzes the image provided in BinaryData.
     /// </summary>
-    /// <param name="stream">The stream containing the image.</param>
-    /// <returns>The analysis results.</returns>
-    Task<ImageAnalysisResults> AnalyzeImageAsync(Stream stream);
+    /// <param name="binaryData">The BinaryData containing the image.</param>
+    /// <returns>The analysis results. Can be null if image analysis is not done.</returns>
+    Task<ImageAnalysisResults?> AnalyzeImageAsync(BinaryData binaryData);
 }

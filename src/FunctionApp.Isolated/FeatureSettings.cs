@@ -12,6 +12,11 @@ public class FeatureSettings
     public bool DisableTimedSending { get; set; }
 
     /// <summary>
+    /// If true, the function will not analyze images.
+    /// </summary>
+    public bool DisableImageAnalysis { get; set; }
+
+    /// <summary>
     /// If true, the function will not send to discord
     /// This is mostly used for debugging purposes.
     /// </summary>

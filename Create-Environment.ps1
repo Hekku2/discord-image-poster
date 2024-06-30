@@ -13,7 +13,8 @@
 #>
 param(
     [Parameter()][string]$SettingsFile = 'developer-settings.json',
-    [Parameter()][switch]$NoDiscord
+    [Parameter()][switch]$NoDiscord,
+    [Parameter()][switch]$DeleteOldRoleAssingments
 )
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
@@ -35,6 +36,13 @@ else {
 Write-Host 'Creating resource group if it doesn''t exist...'
 New-AzResourceGroup -Name $settingsJson.ResourceGroup -Location $settingsJson.Location -Force
 
+if ($DeleteOldRoleAssingments -and -not [string]::IsNullOrEmpty($settingsJson.ExistingCognitiveServicesAccountName)) {
+    Write-Host 'Removing unknown ''Cognitive Services User'' role assignments...'
+    
+    $rg = $settingsJson.ExistingCognitiveServicesResourceGroup ?? $settingsJson.ResourceGroup
+    Remove-UnknownRoleAssingments -ResourceName $settingsJson.ExistingCognitiveServicesAccountName -ResourceGroupName $rg
+}
+
 Write-Host 'Deploying template...'
 $parameters = @{
     baseName               = $settingsJson.ApplicationName
@@ -44,6 +52,10 @@ $parameters = @{
         token     = $settingsJson.DiscordToken
         channelId = $settingsJson.DiscordChannelId
         guildId   = $settingsJson.DiscordGuildId
+    }
+    cognitiveService       = @{
+        existingServiceName          = $settingsJson.ExistingCognitiveServicesAccountName
+        existingServiceResourceGroup = $settingsJson.ExistingCognitiveServicesResourceGroup
     }
 }
 New-AzResourceGroupDeployment `

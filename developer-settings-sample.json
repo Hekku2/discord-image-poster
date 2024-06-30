@@ -1,9 +1,11 @@
 {
-    "ResourceGroup": "",
-    "ApplicationName": "",
-    "Location": "North Europe",
-    "DiscordToken": "",
-    "DiscordGuildId": 0,
-    "DiscordChannelId": 0,
-    "Tags": []
+  "ResourceGroup": "",
+  "ApplicationName": "",
+  "Location": "North Europe",
+  "DiscordToken": "",
+  "DiscordGuildId": 0,
+  "DiscordChannelId": 0,
+  "ExistingCognitiveServicesAccountName": "existing-account-name",
+  "ExistingCognitiveServicesResourceGroup": "existing-resource-group-name",
+  "Tags": []
 }
