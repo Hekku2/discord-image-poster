@@ -29,7 +29,8 @@ jobs:
       run: |
         $archivePath = Join-Path -Path (Resolve-Path ".\").Path -ChildPath 'publish.zip'
         ./scripts/Build-Backend.ps1 -ZipPath $archivePath
-        echo "ARTIFACT_LOCATION=$archivePath" >> $env:GITHUB_ENV
+        echo $archivePath
+        echo "ARTIFACT_LOCATION=$archivePath" >> $env:GITHUB_OUTPUT
     - name: Upload artifacts
       env:
         ARTIFACT_LOCATION: ${{ steps.package-zip.outputs.ARTIFACT_LOCATION }}
