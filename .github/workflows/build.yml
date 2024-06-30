@@ -23,3 +23,8 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Package
+      shell: pwsh
+      run: |
+        $archivePath = Join-Path -Path (Resolve-Path ".\").Path -ChildPath 'publish.zip'
+        ./scripts/Build-Backend.ps1 -ZipPath $archivePath
