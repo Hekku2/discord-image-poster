@@ -25,10 +25,10 @@ jobs:
       run: |
         $settingsPath = Join-Path -Path (Resolve-Path ".\").Path -ChildPath 'test-infra-settings.json'
         $settings = @{
-          ResourceGroup = $env:GITHUB_RUN_ID
-          ApplicationName = $env:GITHUB_RUN_ID
-          Location = "North Europe"
-          DiscordToken = 'mock token'
+          ResourceGroup = $env:GITHUB_RUN_ID,
+          ApplicationName = $env:GITHUB_RUN_ID,
+          Location = "North Europe",
+          DiscordToken = 'mock token',
           DiscordGuildId = 0,
           DiscordChannelId = 0,
           ExistingCognitiveServicesAccountName = "aisa-hjni-discord-image-poster",
