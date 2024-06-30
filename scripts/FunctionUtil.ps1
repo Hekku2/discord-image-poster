@@ -86,3 +86,32 @@ function Get-FunctionBaseUrl() {
     )
     return "https://$($FunctionApp.HostNames[0])/api/"
 }
+
+<#
+    .SYNOPSIS
+    Removes unknown 'Cognitive Services User' assignments from the
+    Cognitive Services resource.
+
+    .DESCRIPTION
+    This is a support script for deployment. When Resource Assignment ID is
+    generated in image-analyzer-permissions.bicep, it uses the identity ID as
+    part of deployment ID. This can cause problems, because the principal ID is
+    different if the identity resource is recreated, but the resource ID is
+    the same.
+#>
+function Remove-UnknownRoleAssingments() {
+    param(
+        [Parameter(Mandatory)][string]$ResourceName,
+        [Parameter(Mandatory)][string]$ResourceGroupName
+    )
+    $resourceType = 'Microsoft.CognitiveServices/accounts'
+    $roleDefinitionName = 'Cognitive Services User'
+    Write-Host "Removing unknown 'Cognitive Services User' role assignments from Resource Group '$ResourceGroupName' resource '$ResourceName'..."
+    Get-AzRoleAssignment `
+        -ResourceName $ResourceName `
+        -ResourceGroupName $ResourceGroupName `
+        -ResourceType $resourceType `
+        -RoleDefinitionName $roleDefinitionName `
+    | Where-Object { $_.ObjectType -eq 'Unknown' } `
+    | Remove-AzRoleAssignment
+}
