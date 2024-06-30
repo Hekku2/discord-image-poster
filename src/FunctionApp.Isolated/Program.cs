@@ -28,7 +28,15 @@ var host = new HostBuilder()
             var options = services.GetRequiredService<IOptions<ImageAnalysisConfiguration>>().Value;
             return new ImageAnalysisClient(new Uri(options.Endpoint), new DefaultAzureCredential());
         });
-        services.AddTransient<IImageAnalysisService, ImageAnalysisService>();
+        services.AddTransient<IImageAnalysisService>(services =>
+        {
+            var options = services.GetRequiredService<IOptions<FeatureSettings>>().Value;
+            return
+                options.DisableImageAnalysis ?
+                new NoOpImageAnalysisService(services.GetRequiredService<ILogger<NoOpImageAnalysisService>>())
+                :
+                new ImageAnalysisService(services.GetRequiredService<ILogger<ImageAnalysisService>>(), services.GetRequiredService<ImageAnalysisClient>());
+        });
 
         services.AddTransient<IDiscordImagePoster>(services =>
         {

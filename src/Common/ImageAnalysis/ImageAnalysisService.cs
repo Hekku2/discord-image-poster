@@ -21,10 +21,10 @@ public class ImageAnalysisService : IImageAnalysisService
     }
 
     /// <inheritdoc/>
-    public async Task<ImageAnalysisResults> AnalyzeImageAsync(Stream stream)
+    public async Task<ImageAnalysisResults?> AnalyzeImageAsync(BinaryData binaryData)
     {
         _logger.LogDebug("Analyzing image...");
-        var result = await _imageAnalysisClient.AnalyzeAsync(BinaryData.FromStream(stream), VisualFeatures.Caption | VisualFeatures.Tags);
+        var result = await _imageAnalysisClient.AnalyzeAsync(binaryData, VisualFeatures.Caption | VisualFeatures.Tags);
         var tags = result.Value.Tags.Values.Select(tag => $"{tag.Name} {tag.Confidence}").ToArray();
         _logger.LogDebug("Image analysis result with caption: {result}, and tags {tags}", result.Value.Caption.Text, tags);
         _logger.LogTrace("Image analysis result: {result}", JsonSerializer.Serialize(result));

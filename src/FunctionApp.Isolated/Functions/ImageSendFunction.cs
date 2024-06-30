@@ -82,22 +82,22 @@ public class ImageSendFunction
         var result = await _imageService.GetImageStream(randomImage.Name);
         if (result is null)
         {
-            _logger.LogError("No image found");
+            _logger.LogError("No image found.");
             return;
         }
 
         var binaryData = BinaryData.FromStream(result.Content);
-        var analyzationResults = await _imageAnalysisService.AnalyzeImageAsync(binaryData.ToStream());
+        var analyzationResults = await _imageAnalysisService.AnalyzeImageAsync(binaryData);
 
-        _logger.LogInformation("Sending image {ImageName} with caption {Caption} and tags {Tags}", randomImage.Name, analyzationResults.Caption, string.Join(", ", analyzationResults.Tags));
+        _logger.LogInformation("Sending image {ImageName} with caption {Caption} and tags {Tags}", randomImage.Name, analyzationResults?.Caption, string.Join(", ", analyzationResults?.Tags ?? Array.Empty<string>()));
         var imageMetadata = new ImageMetadataUpdate
         {
             Name = randomImage.Name,
-            Caption = analyzationResults.Caption,
-            Tags = analyzationResults.Tags
+            Caption = analyzationResults?.Caption,
+            Tags = analyzationResults?.Tags
         };
 
-        await _discordImagePoster.SendImage(binaryData.ToStream(), randomImage.Name, analyzationResults.Caption);
+        await _discordImagePoster.SendImage(binaryData.ToStream(), randomImage.Name, analyzationResults?.Caption ?? randomImage.Name);
 
         await _indexService.IncreasePostingCountAndUpdateMetadataAsync(imageMetadata);
     }
