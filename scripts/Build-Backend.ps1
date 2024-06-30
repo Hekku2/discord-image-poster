@@ -11,6 +11,8 @@ Set-StrictMode -Version Latest
 $project = 'src/FunctionApp.Isolated'
 $publishFolder = 'bin/publish'
 
+Write-Host "Building backend and packing it to $ZipPath..."
+
 dotnet build --output $publishFolder $project --configuration Release
 
 $fullSourcePath = (Resolve-Path "$publishFolder").Path
