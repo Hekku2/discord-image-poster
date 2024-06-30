@@ -29,12 +29,11 @@ jobs:
       run: |
         $archivePath = Join-Path -Path (Resolve-Path ".\").Path -ChildPath 'publish.zip'
         ./scripts/Build-Backend.ps1 -ZipPath $archivePath
-        echo $archivePath
         echo "ARTIFACT_LOCATION=$archivePath" >> $env:GITHUB_OUTPUT
     - name: Upload artifacts
       env:
         ARTIFACT_LOCATION: ${{ steps.package-zip.outputs.ARTIFACT_LOCATION }}
       uses: actions/upload-artifact@v4
       with:
-        name: DiscordImageSender.zip
+        name: DiscordImageSender
         path: ${{ env.ARTIFACT_LOCATION }}
