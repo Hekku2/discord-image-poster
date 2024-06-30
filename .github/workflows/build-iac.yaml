@@ -1,0 +1,37 @@
+name: Build and test infrastructure
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "infra/*.bicep"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "infra/*.bicep"
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Create settings file
+      shell: pwsh
+      env:
+        ARTIFACT_LOCATION: ${{ steps.package-zip.outputs.ARTIFACT_LOCATION }}
+      run: |
+        $settingsPath = Join-Path -Path (Resolve-Path ".\").Path -ChildPath 'test-infra-settings.json'
+        $settings = @{
+          "ResourceGroup" = $env:GITHUB_RUN_ID
+          "ApplicationName" = $env:GITHUB_RUN_ID
+          "Location" = "North Europe"
+          "DiscordToken" = 'mock token'
+          "DiscordGuildId" = 0,
+          "DiscordChannelId" = 0,
+          "ExistingCognitiveServicesAccountName" = "aisa-hjni-discord-image-poster",
+          "ExistingCognitiveServicesResourceGroup" = "hjni-discord-image-poster"
+        }
+        $settings | ConvertTo-Json | Set-Content -Path $settingsPath
+        echo ($settings | ConvertTo-Json)
