@@ -1,14 +1,15 @@
 name: Build and test infrastructure
 
-on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - "infra/*.bicep"
-  pull_request:
-    branches: [ "main" ]
-    paths:
-      - "infra/*.bicep"
+on: workflow_dispatch
+  
+  #push:
+  #  branches: [ "main" ]
+  #  paths:
+  #    - "infra/*.bicep"
+  #pull_request:
+  #  branches: [ "main" ]
+  #  paths:
+  #    - "infra/*.bicep"
 
 jobs:
   build:
