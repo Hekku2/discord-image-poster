@@ -27,6 +27,9 @@ param identityName string
 @description('Cognitive services account name.')
 param cognitiveServicesAccountName string
 
+@description('Resource group of the cognitive services account.')
+param cognitiveServicesAccountResourceGroup string
+
 var hostingPlanName = 'asp-${baseName}'
 var functionAppName = 'func-${baseName}'
 var storageBlobDataOwnerRoleDefinitionId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
@@ -48,7 +51,7 @@ resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-p
 
 resource cognitiveServiceAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   name: cognitiveServicesAccountName
-  scope: resourceGroup()
+  scope: resourceGroup(cognitiveServicesAccountResourceGroup)
 }
 
 resource functionStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {

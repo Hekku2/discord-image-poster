@@ -1,5 +1,11 @@
+/*
+ * Creates Cognitive Services Account for Computer Vision and gives access to the specified identities.
+ */
+
 @minLength(5)
 param baseName string
+
+param cognitiveServiceName string = 'aisa-${baseName}'
 
 @description('Location for all resources.')
 param location string = resourceGroup().location
@@ -7,19 +13,6 @@ param location string = resourceGroup().location
 @description('Identities of which are assigned with Blob Data Reader to the containers.')
 param cognitiveServiceUserIdentityNames string[]
 
-var cognitiveServicesUserRoleDefinitionId = subscriptionResourceId(
-  'Microsoft.Authorization/roleDefinitions',
-  'a97b65f3-24c7-4388-baec-2e87135dc908'
-)
-
-resource identities 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' existing = [
-  for identityName in cognitiveServiceUserIdentityNames: {
-    name: identityName
-    scope: resourceGroup()
-  }
-]
-
-var cognitiveServiceName = 'aisa-${baseName}'
 resource cognitiveServiceAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: cognitiveServiceName
   location: location
@@ -36,14 +29,13 @@ resource cognitiveServiceAccount 'Microsoft.CognitiveServices/accounts@2023-05-0
   }
 }
 
-resource cognitiveServiceAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
+module rbacAssingments 'image-analyzer-permissions.bicep' = [
   for (identityName, i) in cognitiveServiceUserIdentityNames: {
-    scope: cognitiveServiceAccount
-    name: guid(identities[i].id, cognitiveServicesUserRoleDefinitionId, cognitiveServiceAccount.id)
-    properties: {
-      principalId: identities[i].properties.principalId
-      principalType: 'ServicePrincipal'
-      roleDefinitionId: cognitiveServicesUserRoleDefinitionId
+    name: 'cognitiveServiceUser-${i}'
+    params: {
+      cognitiveServiceName: cognitiveServiceAccount.name
+      cognitiveServiceUserIdentityName: cognitiveServiceUserIdentityNames[0]
+      cognitiveServiceUserIdentityResourceGroup: resourceGroup().name
     }
   }
 ]

@@ -45,6 +45,10 @@ $parameters = @{
         channelId = $settingsJson.DiscordChannelId
         guildId   = $settingsJson.DiscordGuildId
     }
+    cognitiveService       = @{
+        existingServiceName          = $settingsJson.ExistingCognitiveServicesAccountName
+        existingServiceResourceGroup = $settingsJson.ExistingCognitiveServicesResourceGroup
+    }
 }
 New-AzResourceGroupDeployment `
     -ResourceGroupName $settingsJson.ResourceGroup `
