@@ -11,6 +11,10 @@ on: workflow_dispatch
   #  paths:
   #    - "infra/*.bicep"
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
