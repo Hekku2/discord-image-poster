@@ -24,7 +24,7 @@ resource identities 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31
   }
 ]
 
-var keyVaultName = replace('kv${baseName}', '-', '')
+var keyVaultName = 'kv${uniqueString(resourceGroup().id, baseName)}'
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: keyVaultName
   location: location
