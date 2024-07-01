@@ -32,10 +32,12 @@ jobs:
         enable-AzPSSession: true 
 
     - name: Create settings file
-      shell: pwsh
+      uses: azure/powershell@v2
+      with:
+        azPSVersion: "latest"
       env:
         ARTIFACT_LOCATION: ${{ steps.package-zip.outputs.ARTIFACT_LOCATION }}
-      run: |
+      inlineScript: |
         $settingsPath = Join-Path -Path (Resolve-Path ".\").Path -ChildPath 'test-infra-settings.json'
         $settings = @{
           ResourceGroup = "discord-image-iactest-$($env:GITHUB_RUN_ID)"
