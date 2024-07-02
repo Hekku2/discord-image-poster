@@ -66,10 +66,15 @@ jobs:
           # Remove role assingments
           $displayName = "id-$($env:RESOURCE_GROUP)"
           Write-Host $displayName
+          $accountName = $env:COGNITIVE_SERVICES_ACCOUNT_NAME
+          Write-Host $accountName
+          $resourceGroup = $env:COGNITIVE_SERVICES_RESOURCEGROUP
+          Write-Host $resourceGroup
+
           Get-AzRoleAssignment `
-            -ResourceName $env:COGNITIVE_SERVICES_ACCOUNT_NAME `
+            -ResourceName $accountName `
             -ResourceType 'Microsoft.CognitiveServices/accounts' `
-            -ResourceGroupName $env:COGNITIVE_SERVICES_RESOURCEGROUP `
+            -ResourceGroupName $resourceGroup `
           | Where-Object { $_.DisplayName -eq $displayName } `
           | Remove-AzRoleAssignment
 
