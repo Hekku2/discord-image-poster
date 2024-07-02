@@ -64,29 +64,20 @@ jobs:
         azPSVersion: "latest"
         inlineScript: |
           # Remove role assingments
-          $displayName = "id-$($env:RESOURCE_GROUP)"
-          Write-Host $displayName
+          $idResourceGroupName = "$($env:RESOURCE_GROUP)"
+          $idName = "id-$($env:RESOURCE_GROUP)"
+          Write-Host $idName
           $accountName = $env:COGNITIVE_SERVICES_ACCOUNT_NAME
           Write-Host $accountName
-          $resourceGroup = $env:COGNITIVE_SERVICES_RESOURCEGROUP
-          Write-Host $resourceGroup
+          $cognitiveServicesResourceGroupName = $env:COGNITIVE_SERVICES_RESOURCEGROUP
+          Write-Host $cognitiveServicesResourceGroupName
+
+          $cognitiveServices = Get-AzCognitiveServicesAccount -ResourceGroupName $cognitiveServicesResourceGroupName -AccountName $accountName
+          $identity = Get-AzUserAssignedIdentity -Name $idName -ResourceGroupName $idResourceGroupName
 
           Get-AzRoleAssignment `
-            -ResourceName $accountName `
-            -ResourceType 'Microsoft.CognitiveServices/accounts' `
-            -ResourceGroupName $resourceGroup 
-
-          Get-AzRoleAssignment `
-            -ResourceName $accountName `
-            -ResourceType 'Microsoft.CognitiveServices/accounts' `
-            -ResourceGroupName $resourceGroup `
-          | Where-Object { $_.DisplayName -eq $displayName }
-
-          Get-AzRoleAssignment `
-            -ResourceName $accountName `
-            -ResourceType 'Microsoft.CognitiveServices/accounts' `
-            -ResourceGroupName $resourceGroup `
-          | Where-Object { $_.DisplayName -eq $displayName } `
+            -Scope $cognitiveServices.Id `
+            -ObjectId $identity.PrincipalId `
           | Remove-AzRoleAssignment
 
           # Delete resource group
