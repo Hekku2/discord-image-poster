@@ -15,6 +15,11 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  RESOURCE_GROUP: dip-iactest-${{ env.GITHUB_RUN_ID }}
+  COGNITIVE_SERVICES_ACCOUNT_NAME: aisa-hjni-discord-image-poster
+  COGNITIVE_SERVICES_RESOURCEGROUP: hjni-discord-image-poster
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -40,14 +45,14 @@ jobs:
         inlineScript: |
           $settingsPath = Join-Path -Path (Resolve-Path ".\").Path -ChildPath 'test-infra-settings.json'
           $settings = @{
-            ResourceGroup = "dip-iactest-$($env:GITHUB_RUN_ID)"
-            ApplicationName = "dip-iactest-$($env:GITHUB_RUN_ID)"
+            ResourceGroup = $env:RESOURCE_GROUP
+            ApplicationName = $env:RESOURCE_GROUP
             Location = "North Europe"
             DiscordToken = 'mock token'
             DiscordGuildId = 0
             DiscordChannelId = 0
-            ExistingCognitiveServicesAccountName = "aisa-hjni-discord-image-poster"
-            ExistingCognitiveServicesResourceGroup = "hjni-discord-image-poster"
+            ExistingCognitiveServicesAccountName = $env:COGNITIVE_SERVICES_ACCOUNT_NAME
+            ExistingCognitiveServicesResourceGroup = $env:COGNITIVE_SERVICES_RESOURCEGROUP
           }
           $settings | ConvertTo-Json | Set-Content -Path $settingsPath
 
@@ -58,4 +63,9 @@ jobs:
       with:
         azPSVersion: "latest"
         inlineScript: |
-          $resourceGroupName = "dip-iactest-$($env:GITHUB_RUN_ID)"
+          Get-AzRoleAssignment `
+            -ResourceName $env:COGNITIVE_SERVICES_ACCOUNT_NAME `
+            -ResourceType 'Microsoft.CognitiveServices/accounts' `
+            -ResourceGroupName $env:COGNITIVE_SERVICES_RESOURCEGROUP `
+          | Where-Object { $_.DisplayName -eq "id-$($env:RESOURCE_GROUP)" } `
+          | Remove-AzRoleAssignment
