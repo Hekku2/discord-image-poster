@@ -81,4 +81,4 @@ jobs:
           | Remove-AzRoleAssignment
 
           # Delete resource group
-          #Remove-AzResourceGroup -Name $env:RESOURCE_GROUP -Force
+          Remove-AzResourceGroup -Name $idResourceGroupName -Force
