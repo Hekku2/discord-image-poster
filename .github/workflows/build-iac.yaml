@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 env:
-  RESOURCE_GROUP: dip-iactest-${{ env.GITHUB_RUN_ID }}
+  RESOURCE_GROUP: dip-iactest-${{ github.run_id }}
   COGNITIVE_SERVICES_ACCOUNT_NAME: aisa-hjni-discord-image-poster
   COGNITIVE_SERVICES_RESOURCEGROUP: hjni-discord-image-poster
 
