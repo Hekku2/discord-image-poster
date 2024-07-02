@@ -63,9 +63,15 @@ jobs:
       with:
         azPSVersion: "latest"
         inlineScript: |
+          # Remove role assingments
+          $displayName = "id-$($env:RESOURCE_GROUP)"
+          Write-Host $displayName
           Get-AzRoleAssignment `
             -ResourceName $env:COGNITIVE_SERVICES_ACCOUNT_NAME `
             -ResourceType 'Microsoft.CognitiveServices/accounts' `
             -ResourceGroupName $env:COGNITIVE_SERVICES_RESOURCEGROUP `
-          | Where-Object { $_.DisplayName -eq "id-$($env:RESOURCE_GROUP)" } `
+          | Where-Object { $_.DisplayName -eq $displayName } `
           | Remove-AzRoleAssignment
+
+          # Delete resource group
+          Remove-AzResourceGroup -Name $env:RESOURCE_GROUP -Force
