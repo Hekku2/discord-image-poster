@@ -74,6 +74,17 @@ jobs:
           Get-AzRoleAssignment `
             -ResourceName $accountName `
             -ResourceType 'Microsoft.CognitiveServices/accounts' `
+            -ResourceGroupName $resourceGroup 
+
+          Get-AzRoleAssignment `
+            -ResourceName $accountName `
+            -ResourceType 'Microsoft.CognitiveServices/accounts' `
+            -ResourceGroupName $resourceGroup `
+          | Where-Object { $_.DisplayName -eq $displayName }
+
+          Get-AzRoleAssignment `
+            -ResourceName $accountName `
+            -ResourceType 'Microsoft.CognitiveServices/accounts' `
             -ResourceGroupName $resourceGroup `
           | Where-Object { $_.DisplayName -eq $displayName } `
           | Remove-AzRoleAssignment
