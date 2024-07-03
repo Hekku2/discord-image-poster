@@ -42,7 +42,8 @@ jobs:
       with:
         repo: 'dsaltares/godot-wild-jam-18'
         version: ${{ env.TAG }}
-        file: 'publish.zip'
+        regex: false
+        file: '*.zip'
     
     #- name: Create environment
     #  uses: azure/powershell@v2
