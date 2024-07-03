@@ -1,38 +1,85 @@
-name: Build and test infrastructure
+name: Build and Test Infrastructure
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
   
-  #push:
-  #  branches: [ "main" ]
-  #  paths:
-  #    - "infra/*.bicep"
-  #pull_request:
-  #  branches: [ "main" ]
-  #  paths:
-  #    - "infra/*.bicep"
+  push:
+    branches: [ "main" ]
+    paths:
+      - "infra/*.bicep"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "infra/*.bicep"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  RESOURCE_GROUP: dip-iactest-${{ github.run_id }}
+  COGNITIVE_SERVICES_ACCOUNT_NAME: ${{ secrets.COGNITIVE_SERVICES_ACCOUNT_NAME }}
+  COGNITIVE_SERVICES_RESOURCEGROUP: ${{ secrets.COGNITIVE_SERVICES_RESOURCEGROUP }}
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    environment: ci-test
 
     steps:
     - uses: actions/checkout@v4
-    - name: Create settings file
-      shell: pwsh
+
+    - name: Login via Az module
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        enable-AzPSSession: true 
+
+    - name: Create environment
+      uses: azure/powershell@v2
       env:
         ARTIFACT_LOCATION: ${{ steps.package-zip.outputs.ARTIFACT_LOCATION }}
-      run: |
-        $settingsPath = Join-Path -Path (Resolve-Path ".\").Path -ChildPath 'test-infra-settings.json'
-        $settings = @{
-          "ResourceGroup" = $env:GITHUB_RUN_ID
-          "ApplicationName" = $env:GITHUB_RUN_ID
-          "Location" = "North Europe"
-          "DiscordToken" = 'mock token'
-          "DiscordGuildId" = 0,
-          "DiscordChannelId" = 0,
-          "ExistingCognitiveServicesAccountName" = "aisa-hjni-discord-image-poster",
-          "ExistingCognitiveServicesResourceGroup" = "hjni-discord-image-poster"
-        }
-        $settings | ConvertTo-Json | Set-Content -Path $settingsPath
-        echo ($settings | ConvertTo-Json)
+      with:
+        azPSVersion: "latest"
+        inlineScript: |
+          $settingsPath = Join-Path -Path (Resolve-Path ".\").Path -ChildPath 'test-infra-settings.json'
+          $settings = @{
+            ResourceGroup = $env:RESOURCE_GROUP
+            ApplicationName = $env:RESOURCE_GROUP
+            Location = "North Europe"
+            DiscordToken = 'mock token'
+            DiscordGuildId = 0
+            DiscordChannelId = 0
+            ExistingCognitiveServicesAccountName = $env:COGNITIVE_SERVICES_ACCOUNT_NAME
+            ExistingCognitiveServicesResourceGroup = $env:COGNITIVE_SERVICES_RESOURCEGROUP
+          }
+          $settings | ConvertTo-Json | Set-Content -Path $settingsPath
+
+          ./Create-Environment.ps1 -SettingsFile $settingsPath -NoDiscord
+    
+    - name: Cleanup
+      uses: azure/powershell@v2
+      with:
+        azPSVersion: "latest"
+        inlineScript: |
+          # Remove role assingments
+          $idResourceGroupName = "$($env:RESOURCE_GROUP)"
+          $idName = "id-$($env:RESOURCE_GROUP)"
+          Write-Host $idName
+          $accountName = $env:COGNITIVE_SERVICES_ACCOUNT_NAME
+          Write-Host $accountName
+          $cognitiveServicesResourceGroupName = $env:COGNITIVE_SERVICES_RESOURCEGROUP
+          Write-Host $cognitiveServicesResourceGroupName
+
+          $cognitiveServices = Get-AzCognitiveServicesAccount -ResourceGroupName $cognitiveServicesResourceGroupName -AccountName $accountName
+          $identity = Get-AzUserAssignedIdentity -Name $idName -ResourceGroupName $idResourceGroupName
+
+          Get-AzRoleAssignment `
+            -Scope $cognitiveServices.Id `
+            -ObjectId $identity.PrincipalId `
+          | Remove-AzRoleAssignment
+
+          # Delete resource group
+          Remove-AzResourceGroup -Name $idResourceGroupName -Force
