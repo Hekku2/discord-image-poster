@@ -37,3 +37,16 @@ jobs:
       with:
         name: DiscordImageSender
         path: ${{ env.ARTIFACT_LOCATION }}
+
+    - name: Create release
+      uses: softprops/action-gh-release@v2
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      with:
+        files: |
+          ${{ steps.package-zip.outputs.ARTIFACT_LOCATION }}
+        tag_name: v${{ github.run_number }}
+        title: Release ${{ github.run_number }}
+        body: |
+          Release ${{ github.run_number }}
+        generate_release_notes: true
+        make_latest: true
