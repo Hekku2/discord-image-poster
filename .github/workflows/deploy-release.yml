@@ -1,0 +1,53 @@
+# Workflow for deploying new releases to the production environment
+name: Production deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to deploy'
+        default: 'latest'
+
+  release:
+    types: [released]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  release:
+    name: Deploy release
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      RESOURCE_GROUP: ${{ secrets.PRODUCTION_RESOURCE_GROUP }}
+      APP_NAME: ${{ secrets.PRODUCTION_APP_NAME }}
+      TAG: ${{ github.event_name != 'release' && 'latest' || format('tags/{0}', github.event.release.tag_name) }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Login via Az module
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        enable-AzPSSession: true 
+    
+    - name: Fetch release asset
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: 'dsaltares/godot-wild-jam-18'
+        version: tags/{{ github.event.release.tag_name  }}
+        file: 'publish.zip'
+
+    
+    #- name: Create environment
+    #  uses: azure/powershell@v2
+    #  with:
+    #    azPSVersion: "latest"
+    #    inlineScript: |
+    #      ./scripts/Deploy-FunctionApp.ps1 -ResourceGroup $env:RESOURCE_GROUP -AppName $env:APP_NAME -ZipFile publish.zip
