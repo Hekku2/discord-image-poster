@@ -1,15 +1,16 @@
 name: Build and Test Infrastructure
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
   
-  #push:
-  #  branches: [ "main" ]
-  #  paths:
-  #    - "infra/*.bicep"
-  #pull_request:
-  #  branches: [ "main" ]
-  #  paths:
-  #    - "infra/*.bicep"
+  push:
+    branches: [ "main" ]
+    paths:
+      - "infra/*.bicep"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "infra/*.bicep"
 
 permissions:
   id-token: write
@@ -36,7 +37,7 @@ jobs:
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         enable-AzPSSession: true 
 
-    - name: Create settings file
+    - name: Create environment
       uses: azure/powershell@v2
       env:
         ARTIFACT_LOCATION: ${{ steps.package-zip.outputs.ARTIFACT_LOCATION }}
