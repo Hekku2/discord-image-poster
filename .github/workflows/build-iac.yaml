@@ -22,7 +22,8 @@ env:
   COGNITIVE_SERVICES_RESOURCEGROUP: ${{ secrets.COGNITIVE_SERVICES_RESOURCEGROUP }}
 
 jobs:
-  build:
+  test-iac:
+    name: Test Infrastructure as Code
     runs-on: ubuntu-latest
     environment: ci-test
 
