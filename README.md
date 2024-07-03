@@ -18,9 +18,12 @@ In depth
  for implementation details.
    * If there is no index, software builds an index of images available in
    source.
- 1. After image is selected, software downloads the image from storage and
- sends the image to the chosen Discord channel.
+ 1. After image is selected, software downloads the image from storage to memory
    * If Image is removed, error is logged and image is not sent to channel.
+ 1. After file is downloaded, image is sent to Azure AI Vision for analysis
+   * This functionality can be disabled with from Feature Settings
+ 1. Caption and tags from Azure AI Vision response are saved to index.
+ 1. Image is sent to discord with received caption. If image analysis is not used, file name is used as caption.
 
 Indexing
  * Indexing is performed automatically if index doesn't exist.
