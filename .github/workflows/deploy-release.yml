@@ -43,7 +43,7 @@ jobs:
         repo: 'dsaltares/godot-wild-jam-18'
         version: ${{ env.TAG }}
         regex: false
-        file: '*.zip'
+        file: '*'
     
     #- name: Create environment
     #  uses: azure/powershell@v2
