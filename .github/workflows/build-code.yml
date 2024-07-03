@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  # Needed for release creation
+  contents: write
+
 jobs:
   build:
 
