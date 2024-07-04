@@ -44,9 +44,9 @@ jobs:
         enable-AzPSSession: true 
     
     - uses: actions/checkout@v4
-    #- name: Create environment
-    #  uses: azure/powershell@v2
-    #  with:
-    #    azPSVersion: "latest"
-    #    inlineScript: |
-    #      ./scripts/Deploy-FunctionApp.ps1 -ResourceGroup $env:RESOURCE_GROUP -AppName $env:APP_NAME -ZipFile publish.zip
+    - name: Create environment
+      uses: azure/powershell@v2
+      with:
+        azPSVersion: "latest"
+        inlineScript: |
+          ./scripts/Deploy-FunctionApp.ps1 -ResourceGroup $env:RESOURCE_GROUP -AppName $env:APP_NAME -ZipFile publish.zip
