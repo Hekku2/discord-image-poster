@@ -44,7 +44,8 @@ jobs:
         enable-AzPSSession: true 
     
     - uses: actions/checkout@v4
-    - name: Create environment
+
+    - name: Deploy binaries
       uses: azure/powershell@v2
       with:
         azPSVersion: "latest"
