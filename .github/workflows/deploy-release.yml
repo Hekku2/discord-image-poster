@@ -27,7 +27,13 @@ jobs:
       TAG: ${{ github.event_name != 'release' && 'latest' || format('tags/{0}', github.event.release.tag_name) }}
 
     steps:
-    - uses: actions/checkout@v4
+   
+    - name: Fetch release asset
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo:  ${{ github.repository }}
+        version: ${{ env.TAG }}
+        file: 'publish.zip'
 
     - name: Login via Az module
       uses: azure/login@v2
@@ -37,14 +43,7 @@ jobs:
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         enable-AzPSSession: true 
     
-    - name: Fetch release asset
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo:  ${{ github.repository }}
-        version: ${{ env.TAG }}
-        regex: false
-        file: '*'
-    
+    - uses: actions/checkout@v4
     #- name: Create environment
     #  uses: azure/powershell@v2
     #  with:
