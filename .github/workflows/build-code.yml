@@ -49,7 +49,6 @@ jobs:
         files: |
           ${{ steps.package-zip.outputs.ARTIFACT_LOCATION }}
         tag_name: v${{ github.run_number }}
-        title: Release ${{ github.run_number }}
         body: |
           Release ${{ github.run_number }}
         generate_release_notes: true

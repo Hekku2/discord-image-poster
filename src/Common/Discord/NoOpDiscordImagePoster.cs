@@ -16,9 +16,9 @@ public class NoOpDiscordImagePoster : IDiscordImagePoster
         _logger = logger;
     }
 
-    public Task SendImage(Stream stream, string fileName, string? description)
+    public Task SendImageAsync(ImagePostingParameters parameters)
     {
-        _logger.LogWarning("Discord sending is disabled. Filename was {fileName} with description {description}.", fileName, description);
+        _logger.LogWarning("Discord sending is disabled. Filename was {fileName} with description {description}.", parameters.FileName, parameters.Description);
         return Task.CompletedTask;
     }
 }
