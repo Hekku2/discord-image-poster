@@ -36,7 +36,7 @@ jobs:
           let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              run_id: context.env.RUN_ID,
+              run_id: process.env.RUN_ID
           });
           let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
             return artifact.name == "DiscordImageSender"
