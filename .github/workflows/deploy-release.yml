@@ -68,5 +68,4 @@ jobs:
       with:
         azPSVersion: "latest"
         inlineScript: |
-          ls
           ./scripts/Deploy-FunctionApp.ps1 -ResourceGroup $env:RESOURCE_GROUP -AppName $env:APP_NAME -ZipFile "$($env:GITHUB_WORKSPACE)/publish.zip"
