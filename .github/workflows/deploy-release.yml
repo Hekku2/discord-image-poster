@@ -50,6 +50,9 @@ jobs:
           let fs = require('fs');
           fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/publish.zip`, Buffer.from(download.data));
 
+    - name: 'Unzip artifact'
+      run: unzip DiscordImageSender.zip
+
     - name: Login via Az module
       uses: azure/login@v2
       with:
