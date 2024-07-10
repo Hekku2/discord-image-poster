@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace DiscordImagePoster.Common.IndexService;
 
 /// <summary>

@@ -1,23 +1,87 @@
-﻿using Discord;
-using Discord.Rest;
-using System.Net;
-using Azure.Identity;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using Azure.Storage.Blobs.Specialized;
-using Azure;
-
+﻿using System.Text.Json;
+using CommandLine;
+using DiscordImagePoster.Common.BlobStorageImageService;
+using DiscordImagePoster.Common.Discord;
+using DiscordImagePoster.Common.IndexService;
+using DiscordImagePoster.Common.ImageAnalysis;
+using DiscordImagePoster.ConsoleTester.Options;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace DiscordImagePoster.ConsoleTester;
 
 public class Program
 {
-
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
-        var containerClient = new BlobContainerClient("UseDevelopmentStorage=true", "images");
+        // Note: CreateApplicationBuilder is mainly used for easier access to config, DI, etc.
+        var builder = Host.CreateApplicationBuilder(args);
 
-        var blobclient = containerClient.GetBlobClient("testfolder/test1.png");
-        var prop = blobclient.GetProperties();
+        await Parser.Default.ParseArguments<DiscordSendVerb, GetIndexVerb, RefreshIndexVerb, AnalyzeImageVerb>(args)
+          .MapResult(
+            async (DiscordSendVerb options) => await SendImageToDiscord(builder, options),
+            async (GetIndexVerb options) => await GetIndex(builder, options),
+            async (RefreshIndexVerb options) => await RefreshIndex(builder, options),
+            async (AnalyzeImageVerb options) => await AnalyzeImage(builder, options),
+            async _ => await Task.CompletedTask);
+    }
+
+    private static async Task AnalyzeImage(HostApplicationBuilder builder, AnalyzeImageVerb verb)
+    {
+        builder.Services.AddImageAnalysisServices();
+        using var stream = File.OpenRead(verb.ImagePath);
+        var binaryData = await BinaryData.FromStreamAsync(stream);
+
+        var host = builder.Build();
+
+        var result = await host.Services.GetRequiredService<IImageAnalysisService>().AnalyzeImageAsync(binaryData);
+        var serialized = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+        await File.WriteAllTextAsync(verb.OutputPath, serialized);
+    }
+
+    public static async Task SendImageToDiscord(HostApplicationBuilder builder, DiscordSendVerb verb)
+    {
+        builder.Services.AddDiscordSendingServices();
+
+        if (verb.Analyze)
+        {
+            builder.Services.AddImageAnalysisServices();
+        }
+
+        var host = builder.Build();
+
+        using var stream = File.OpenRead(verb.ImagePath);
+        var binaryData = await BinaryData.FromStreamAsync(stream);
+        if (verb.Analyze)
+        {
+            await host.Services.GetRequiredService<IImageAnalysisService>().AnalyzeImageAsync(binaryData);
+        }
+
+        await host.Services.GetRequiredService<IDiscordImagePoster>().SendImageAsync(new ImagePostingParameters
+        {
+            ImageStream = binaryData.ToStream(),
+            FileName = Path.GetFileName(verb.ImagePath),
+            Description = verb.Description
+        });
+    }
+
+    public static async Task GetIndex(HostApplicationBuilder builder, GetIndexVerb verb)
+    {
+        builder.Services.AddIndexServices();
+        builder.Services.AddBlobStorageImageService();
+        var host = builder.Build();
+
+        var index = await host.Services.GetRequiredService<IIndexService>().GetIndexAsync();
+        var serialized = JsonSerializer.Serialize(index, new JsonSerializerOptions { WriteIndented = true });
+        await File.WriteAllTextAsync(verb.OutputPath, serialized);
+    }
+
+    public static async Task RefreshIndex(HostApplicationBuilder builder, RefreshIndexVerb verb)
+    {
+        builder.Services.AddIndexServices();
+        builder.Services.AddBlobStorageImageService();
+        var host = builder.Build();
+
+        await host.Services.GetRequiredService<IIndexService>().RefreshIndexAsync();
     }
 }

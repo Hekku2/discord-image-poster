@@ -97,7 +97,13 @@ public class ImageSendFunction
             Tags = analyzationResults?.Tags
         };
 
-        await _discordImagePoster.SendImage(binaryData.ToStream(), randomImage.Name, analyzationResults?.Caption ?? randomImage.Name);
+        var parameters = new ImagePostingParameters
+        {
+            ImageStream = binaryData.ToStream(),
+            FileName = randomImage.Name,
+            Description = analyzationResults?.Caption
+        };
+        await _discordImagePoster.SendImageAsync(parameters);
 
         await _indexService.IncreasePostingCountAndUpdateMetadataAsync(imageMetadata);
     }

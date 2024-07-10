@@ -21,4 +21,14 @@ public class FeatureSettings
     /// This is mostly used for debugging purposes.
     /// </summary>
     public bool DisableDiscordSending { get; set; }
+
+    /// <summary>
+    /// Creates instance of <see cref="FeatureSettings"/> with default values.
+    /// </summary>
+    public static FeatureSettings Default => new FeatureSettings
+    {
+        DisableTimedSending = false,
+        DisableImageAnalysis = false,
+        DisableDiscordSending = false
+    };
 }
