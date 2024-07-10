@@ -48,7 +48,7 @@ jobs:
               archive_format: 'zip',
           });
           let fs = require('fs');
-          fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/publish.zip`, Buffer.from(download.data));
+          fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/DiscordImageSender.zip`, Buffer.from(download.data));
 
     - name: 'Unzip artifact'
       run: unzip DiscordImageSender.zip
