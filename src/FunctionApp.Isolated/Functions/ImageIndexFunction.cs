@@ -7,7 +7,7 @@ namespace DiscordImagePoster.FunctionApp.Isolated;
 
 public class ImageIndexFunction
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<ImageSendFunction> _logger;
     private readonly IIndexService _indexService;
 
     public ImageIndexFunction(ILogger<ImageSendFunction> logger, IIndexService indexService)

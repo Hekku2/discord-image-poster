@@ -53,6 +53,7 @@ jobs:
             DiscordToken = 'mock token'
             DiscordGuildId = 0
             DiscordChannelId = 0
+            DiscordPublicKey = ''
             ExistingCognitiveServicesAccountName = $env:COGNITIVE_SERVICES_ACCOUNT_NAME
             ExistingCognitiveServicesResourceGroup = $env:COGNITIVE_SERVICES_RESOURCEGROUP
           }

@@ -17,12 +17,13 @@ public class Program
         // Note: CreateApplicationBuilder is mainly used for easier access to config, DI, etc.
         var builder = Host.CreateApplicationBuilder(args);
 
-        await Parser.Default.ParseArguments<DiscordSendVerb, GetIndexVerb, RefreshIndexVerb, AnalyzeImageVerb>(args)
+        await Parser.Default.ParseArguments<DiscordSendVerb, GetIndexVerb, RefreshIndexVerb, AnalyzeImageVerb, RegisterCommandVerb>(args)
           .MapResult(
             async (DiscordSendVerb options) => await SendImageToDiscord(builder, options),
             async (GetIndexVerb options) => await GetIndex(builder, options),
             async (RefreshIndexVerb options) => await RefreshIndex(builder, options),
             async (AnalyzeImageVerb options) => await AnalyzeImage(builder, options),
+            async (RegisterCommandVerb options) => await RegisterCommands(builder, options),
             async _ => await Task.CompletedTask);
     }
 
@@ -83,5 +84,13 @@ public class Program
         var host = builder.Build();
 
         await host.Services.GetRequiredService<IIndexService>().RefreshIndexAsync();
+    }
+
+    public static async Task RegisterCommands(HostApplicationBuilder builder, RegisterCommandVerb verb)
+    {
+        builder.Services.AddDiscordSendingServices();
+        var host = builder.Build();
+
+        await host.Services.GetRequiredService<IDiscordCommandRegisterer>().RegisterCommandsAsync();
     }
 }

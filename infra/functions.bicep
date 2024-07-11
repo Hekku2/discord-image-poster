@@ -182,6 +182,10 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
           value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=DiscordChannelId)'
         }
         {
+          name: '${discordSettingsKey}__PublicKey'
+          value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=DiscordPublicKey)'
+        }
+        {
           name: '${blobStorageKey}__BlobContainerUri'
           value: imageStorageSettings.blobContainerUri
         }

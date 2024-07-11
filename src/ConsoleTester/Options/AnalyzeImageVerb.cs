@@ -10,5 +10,4 @@ public class AnalyzeImageVerb
 
     [Option('o', "output", Required = true, HelpText = "Path to save the output.")]
     public required string OutputPath { get; set; }
-
 }

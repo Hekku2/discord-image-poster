@@ -52,6 +52,7 @@ $parameters = @{
         token     = $settingsJson.DiscordToken
         channelId = $settingsJson.DiscordChannelId
         guildId   = $settingsJson.DiscordGuildId
+        publicKey = $settingsJson.DiscordPublicKey
     }
     cognitiveService       = @{
         existingServiceName          = $settingsJson.ExistingCognitiveServicesAccountName

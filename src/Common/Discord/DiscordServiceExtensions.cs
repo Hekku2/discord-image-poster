@@ -13,6 +13,7 @@ public static class DiscordServiceExtensions
     {
         services.AddOptions<DiscordConfiguration>().BindConfiguration(nameof(DiscordConfiguration)).ValidateDataAnnotations().ValidateOnStart();
         services.AddTransient<IDiscordImagePoster, DiscordImagePoster>();
+        services.AddTransient<IDiscordCommandRegisterer, DiscordImagePoster>();
         return services;
     }
 }

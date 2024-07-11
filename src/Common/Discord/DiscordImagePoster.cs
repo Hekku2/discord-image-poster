@@ -1,11 +1,12 @@
 using Discord;
+using Discord.Net;
 using Discord.Rest;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DiscordImagePoster.Common.Discord;
 
-public class DiscordImagePoster : IDiscordImagePoster
+public class DiscordImagePoster : IDiscordImagePoster, IDiscordCommandRegisterer
 {
     private readonly ILogger<DiscordImagePoster> _logger;
     private readonly DiscordConfiguration _options;
@@ -31,6 +32,24 @@ public class DiscordImagePoster : IDiscordImagePoster
             return;
         }
         var sentMessage = await textChannel.SendFileAsync(file, parameters.Description ?? parameters.FileName, false);
+    }
+
+    public async Task RegisterCommandsAsync()
+    {
+        var guildCommand = new SlashCommandBuilder();
+        guildCommand.WithName("post-random-image")
+            .WithDescription("Post a random image to the channel.");
+
+        try
+        {
+            using var client = await GetAuthenticatedClient();
+            var guild = await client.GetGuildAsync(_options.GuildId);
+            await guild.CreateApplicationCommandAsync(guildCommand.Build());
+        }
+        catch (HttpException ex)
+        {
+            _logger.LogError(ex, "Failed to create command.");
+        }
     }
 
     private async Task<DiscordRestClient> GetAuthenticatedClient()
