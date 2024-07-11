@@ -30,6 +30,7 @@ var host = new HostBuilder()
             services.AddImageAnalysisServices();
 
         services.AddTransient<IRandomizationService, RandomizationService>();
+        services.AddTransient<IRandomImagePoster, RandomImagePoster>();
 
         services.AddLogging();
     })
