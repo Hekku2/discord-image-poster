@@ -52,6 +52,10 @@ module keyVaultModule 'key-vault.bicep' = {
         key: 'DiscordChannelId'
         value: '${discordSettings.channelId}'
       }
+      {
+        key: 'DiscordPublicKey'
+        value: discordSettings.publicKey
+      }
     ]
   }
 }

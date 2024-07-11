@@ -4,6 +4,7 @@ type DiscordSettings = {
   token: string
   guildId: int
   channelId: int
+  publicKey: string
 }
 
 @export()

@@ -26,6 +26,7 @@ $dockerEnvFileContent = "
 DISCORD_TOKEN=$($settingsJson.DiscordToken)
 DISCORD_GUILDID=$($settingsJson.DiscordGuildId)
 DISCORD_CHANNELID=$($settingsJson.DiscordChannelId)
+DISCORD_PUBLICKEY=$($settingsJson.DiscordPublicKey)
 "
 Write-Host "Writing $dockerEnvFile"
 $dockerEnvFileContent | Out-File -FilePath $dockerEnvFile -Encoding utf8

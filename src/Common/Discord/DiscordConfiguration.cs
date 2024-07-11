@@ -31,4 +31,11 @@ public class DiscordConfiguration
     /// </summary>
     [Required]
     public ulong ChannelId { get; set; }
+
+    /// <summary>
+    /// The public key of the bot. This is used to verify the authenticity of
+    /// the requests sent to the bot.
+    /// </summary>
+    [Required]
+    public required string PublicKey { get; set; }
 }

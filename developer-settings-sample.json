@@ -5,6 +5,7 @@
   "DiscordToken": "",
   "DiscordGuildId": 0,
   "DiscordChannelId": 0,
+  "DiscordPublicKey": "",
   "ExistingCognitiveServicesAccountName": "existing-account-name",
   "ExistingCognitiveServicesResourceGroup": "existing-resource-group-name",
   "Tags": []
