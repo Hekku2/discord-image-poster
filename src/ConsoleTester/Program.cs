@@ -15,7 +15,11 @@ public class Program
     public static async Task Main(string[] args)
     {
         // Note: CreateApplicationBuilder is mainly used for easier access to config, DI, etc.
-        var builder = Host.CreateApplicationBuilder(args);
+        var settings = new HostApplicationBuilderSettings
+        {
+            EnvironmentName = "Development"
+        };
+        var builder = Host.CreateApplicationBuilder(settings);
 
         await Parser.Default.ParseArguments<DiscordSendVerb, GetIndexVerb, RefreshIndexVerb, AnalyzeImageVerb, RegisterCommandVerb>(args)
           .MapResult(

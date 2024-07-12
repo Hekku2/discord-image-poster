@@ -20,6 +20,7 @@ services:
       - BlobStorageImageSourceOptions__FolderPath=testfolder
       - ImageIndexOptions__ConnectionString=DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://local.storage.emulator:10000/devstoreaccount1;QueueEndpoint=http://local.storage.emulator:10001/devstoreaccount1;
       - ImageIndexOptions__ContainerName=index
+      - ImageAnalysisConfiguration__Endpoint=${COGNITIVESERVICES_ENDPOINT}
       - FeatureSettings__DisableTimedSending=true
       - FeatureSettings__DisableDiscordSending=true
     depends_on:
