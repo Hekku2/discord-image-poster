@@ -403,3 +403,4 @@ FodyWeavers.xsd
 .env
 developer-settings.json
 publish.zip
+src/FunctionApp.Isolated/dev_secrets/sendimage.json
