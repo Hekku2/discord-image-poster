@@ -1,8 +1,4 @@
 using System.Net;
-using DiscordImagePoster.Common.BlobStorageImageService;
-using DiscordImagePoster.Common.Discord;
-using DiscordImagePoster.Common.ImageAnalysis;
-using DiscordImagePoster.Common.IndexService;
 using DiscordImagePoster.Common.RandomizationService;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;

@@ -19,6 +19,13 @@ Set-StrictMode -Version Latest
 Write-Host "Reading settings from file $SettingsFile"
 $settingsJson = Get-Content -Raw -Path $SettingsFile | ConvertFrom-Json
 
+$cognitiveServicesEndpoint = ''
+if (-not [string]::IsNullOrEmpty($settingsJson.ExistingCognitiveServicesAccountName) -and -not [string]::IsNullOrEmpty($settingsJson.ExistingCognitiveServicesResourceGroup)) {
+    Write-Host 'Retrieving cognitive services endpoint from existing account'
+    $service = Get-AzCognitiveServicesAccount -ResourceGroupName hjni-discord-image-poster -AccountName aisa-hjni-discord-image-poster
+    $cognitiveServicesEndpoint = $service.Endpoint
+}
+
 # Docker compose support
 $dockerEnvFile = "$PSScriptRoot/.env"
 $dockerEnvFileContent = "
@@ -27,12 +34,14 @@ DISCORD_TOKEN=$($settingsJson.DiscordToken)
 DISCORD_GUILDID=$($settingsJson.DiscordGuildId)
 DISCORD_CHANNELID=$($settingsJson.DiscordChannelId)
 DISCORD_PUBLICKEY=$($settingsJson.DiscordPublicKey)
+COGNITIVESERVICES_ENDPOINT=$cognitiveServicesEndpoint
 "
-Write-Host "Writing $dockerEnvFile"
+Write-Host "Writing Docker ENV $dockerEnvFile"
 $dockerEnvFileContent | Out-File -FilePath $dockerEnvFile -Encoding utf8
 
 # Function Core Tools support
 $funcSettingsFile = "$PSScriptRoot/src/FunctionApp.Isolated/local.settings.json"
+Write-Host "Writing Function Core Toole support $funcSettingsFile"
 $localSettings = @{
     IsEncrypted = $false
     Values      = @{
@@ -41,3 +50,12 @@ $localSettings = @{
     }
 }
 $localSettings | ConvertTo-Json | Out-File -FilePath $funcSettingsFile -Encoding utf8
+
+Write-Host "Writing user-secrets for console tester."
+
+# NOTE: For some reason __ didn't work in the key names, so I had to use : instead.
+dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration:Token" "$($settingsJson.DiscordToken)"
+dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration:GuildId" "$($settingsJson.DiscordGuildId)"
+dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration:ChannelId" "$($settingsJson.DiscordChannelId)"
+dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration:PublicKey" "$($settingsJson.DiscordPublicKey)"
+dotnet user-secrets --project src/ConsoleTester set "ImageAnalysisConfiguration:Endpoint" "$($cognitiveServicesEndpoint)"
