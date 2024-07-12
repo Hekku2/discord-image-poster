@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0-preview AS installer-env
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS installer-env
 
 COPY . /src/
 RUN cd /src/FunctionApp.Isolated && \
