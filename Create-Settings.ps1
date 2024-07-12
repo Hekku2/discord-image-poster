@@ -45,12 +45,14 @@ Write-Host "Writing Function Core Toole support $funcSettingsFile"
 $localSettings = @{
     IsEncrypted = $false
     Values      = @{
-        AzureWebJobsStorage             = 'UseDevelopmentStorage=true'
-        FUNCTIONS_WORKER_RUNTIME        = 'dotnet-isolated'
-        DiscordConfiguration__Token     = $settingsJson.DiscordToken
-        DiscordConfiguration__GuildId   = $settingsJson.DiscordGuildId
-        DiscordConfiguration__ChannelId = $settingsJson.DiscordChannelId
-        DiscordConfiguration__PublicKey = $settingsJson.DiscordPublicKey
+        AzureWebJobsStorage                  = 'UseDevelopmentStorage=true'
+        FUNCTIONS_WORKER_RUNTIME             = 'dotnet-isolated'
+        DiscordConfiguration__Token          = $settingsJson.DiscordToken
+        DiscordConfiguration__GuildId        = $settingsJson.DiscordGuildId
+        DiscordConfiguration__ChannelId      = $settingsJson.DiscordChannelId
+        DiscordConfiguration__PublicKey      = $settingsJson.DiscordPublicKey
+        ImageAnalysisConfiguration__Endpoint = $cognitiveServicesEndpoint
+        ImageIndexOptions__ContainerName     = 'images'
     }
 }
 $localSettings | ConvertTo-Json | Out-File -FilePath $funcSettingsFile -Encoding utf8
