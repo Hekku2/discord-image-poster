@@ -2,6 +2,7 @@ using System.Net;
 using DiscordImagePoster.Common.RandomizationService;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.DurableTask.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -25,11 +26,14 @@ public class ImageSendFunction
     }
 
     [Function("SendImage")]
-    public async Task<HttpResponseData> SendRandomImage([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+    public async Task<HttpResponseData> SendRandomImage(
+        [HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req,
+        [DurableClient] DurableTaskClient client,
+        CancellationToken cancellation)
     {
         _logger.LogInformation("Sending random image triggered manually.");
 
-        await _randomImagePoster.PostRandomImageAsync();
+        await client.ScheduleNewOrchestrationInstanceAsync(nameof(ImageSendOrchestration), "", cancellation);
 
         return req.CreateResponse(HttpStatusCode.Accepted);
     }
