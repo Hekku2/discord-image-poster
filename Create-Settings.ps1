@@ -51,11 +51,11 @@ $localSettings = @{
 }
 $localSettings | ConvertTo-Json | Out-File -FilePath $funcSettingsFile -Encoding utf8
 
-$consoleTesterSettingsFile = "$PSScriptRoot/src/ConsoleTester/appsettings.local.json"
-Write-Host "Writing user-secrets for console tester $consoleTesterSettingsFile"
+Write-Host "Writing user-secrets for console tester."
 
-dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration__Token" "$($settingsJson.DiscordToken)"
-dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration__GuildId" "$($settingsJson.DiscordGuildId)"
-dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration__ChannelId" "$($settingsJson.DiscordChannelId)"
-dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration__PublicKey" "$($settingsJson.DiscordPublicKey)"
-dotnet user-secrets --project src/ConsoleTester set "ImageAnalysisConfiguration__Endpoint" "$($cognitiveServicesEndpoint)"
+# NOTE: For some reason __ didn't work in the key names, so I had to use : instead.
+dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration:Token" "$($settingsJson.DiscordToken)"
+dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration:GuildId" "$($settingsJson.DiscordGuildId)"
+dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration:ChannelId" "$($settingsJson.DiscordChannelId)"
+dotnet user-secrets --project src/ConsoleTester set "DiscordConfiguration:PublicKey" "$($settingsJson.DiscordPublicKey)"
+dotnet user-secrets --project src/ConsoleTester set "ImageAnalysisConfiguration:Endpoint" "$($cognitiveServicesEndpoint)"
