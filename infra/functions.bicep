@@ -33,6 +33,8 @@ param cognitiveServicesAccountResourceGroup string
 var hostingPlanName = 'asp-${baseName}'
 var functionAppName = 'func-${baseName}'
 var storageBlobDataOwnerRoleDefinitionId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
+var storageQueueDataContributorRoleDefinitionId = '974c5e8b-45b9-4653-ba55-5f855dd0fb88'
+var storageTableDataContributorRoleDefinitionId = '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: applicationInsightsName
@@ -215,6 +217,32 @@ resource functionAppFunctionBlobStorageAccess 'Microsoft.Authorization/roleAssig
     roleDefinitionId: subscriptionResourceId(
       'Microsoft.Authorization/roleDefinitions',
       storageBlobDataOwnerRoleDefinitionId
+    )
+  }
+}
+
+resource functionAppFunctionQueueStorageAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: functionStorageAccount
+  name: guid(identity.id, storageQueueDataContributorRoleDefinitionId, functionStorageAccount.id)
+  properties: {
+    principalId: identity.properties.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      storageQueueDataContributorRoleDefinitionId
+    )
+  }
+}
+
+resource functionAppFunctionTableStorageAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: functionStorageAccount
+  name: guid(identity.id, storageTableDataContributorRoleDefinitionId, functionStorageAccount.id)
+  properties: {
+    principalId: identity.properties.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      storageTableDataContributorRoleDefinitionId
     )
   }
 }

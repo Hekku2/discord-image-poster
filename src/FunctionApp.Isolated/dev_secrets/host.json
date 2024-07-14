@@ -1,14 +1,25 @@
-{
-    "masterKey": {
-        "name": "master",
-        "value": "mock-secret-for-local-testing",
-        "encrypted": false
-    },
-    "functionKeys": [
-        {
-            "name": "default",
-            "value": "mock-secret-for-local-testing",
-            "encrypted": false
-        }
-    ]
+﻿{
+  "masterKey": {
+    "name": "master",
+    "value": "mock-secret-for-local-testing",
+    "encrypted": false
+  },
+  "functionKeys": [
+    {
+      "name": "default",
+      "value": "mock-secret-for-local-testing",
+      "encrypted": false
+    }
+  ],
+  "systemKeys": [
+    {
+      "name": "durabletask_extension",
+      "value": "mock-secret-for-local-testing",
+      "encrypted": false
+    }
+  ],
+  "hostName": "localhost:8080",
+  "instanceId": "0000000000000000000000008156EC52",
+  "source": "runtime",
+  "decryptionKeyId": ""
 }

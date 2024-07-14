@@ -3,8 +3,10 @@ using Discord.Rest;
 using DiscordImagePoster.Common.Discord;
 using DiscordImagePoster.Common.RandomizationService;
 using DiscordImagePoster.FunctionApp.Isolated.DiscordDto;
+using DiscordImagePoster.FunctionApp.Isolated.Functions;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.DurableTask.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -15,21 +17,22 @@ public class DiscordWebhookFunction
 {
     private readonly ILogger<DiscordWebhookFunction> _logger;
     private readonly string _publicKey;
-    private readonly IRandomImagePoster _randomImagePoster;
 
     public DiscordWebhookFunction(
         ILogger<DiscordWebhookFunction> logger,
-        IOptions<DiscordConfiguration> options,
-        IRandomImagePoster randomImagePoster
+        IOptions<DiscordConfiguration> options
     )
     {
         _logger = logger;
         _publicKey = options.Value.PublicKey;
-        _randomImagePoster = randomImagePoster;
     }
 
     [Function("HandleDiscordWebHook")]
-    public async Task<HttpResponseData> HandleWebhook([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
+    public async Task<HttpResponseData> HandleWebhook(
+        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req,
+        [DurableClient] DurableTaskClient client,
+        CancellationToken cancellation
+        )
     {
 
         _logger.LogInformation("Handling webhook.");
@@ -47,8 +50,7 @@ public class DiscordWebhookFunction
         }
 
         var stringBody = await req.ReadAsStringAsync() ?? string.Empty;
-        var client = new DiscordRestClient();
-        var isValid = client.IsValidHttpInteraction(_publicKey, signature, timestamp, stringBody);
+        var isValid = new DiscordRestClient().IsValidHttpInteraction(_publicKey, signature, timestamp, stringBody);
         if (!isValid)
         {
             _logger.LogError("Invalid signature.");
@@ -66,7 +68,7 @@ public class DiscordWebhookFunction
                 _logger.LogInformation("Handle command");
                 if (response?.Data?.Name == "post-random-image")
                 {
-                    await _randomImagePoster.PostRandomImageAsync();
+                    await client.ScheduleNewOrchestrationInstanceAsync(nameof(ImageSendOrchestration), "", cancellation);
                 }
                 return await CreateCommandResponse(req);
             default:

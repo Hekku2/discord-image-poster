@@ -9,8 +9,8 @@ services:
     ports:
       - 8080:80
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - AzureWebJobsStorage=AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=https;BlobEndpoint=http://azurite:local.storage.emulator/devstoreaccount1;QueueEndpoint=http://local.storage.emulator:10001/devstoreaccount1;TableEndpoint=http://local.storage.emulator:10002/devstoreaccount1;
+      - WEBSITE_HOSTNAME=localhost:8080
+      - AzureWebJobsStorage=AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=https;BlobEndpoint=http://local.storage.emulator:10000/devstoreaccount1;QueueEndpoint=http://local.storage.emulator:10001/devstoreaccount1;TableEndpoint=http://local.storage.emulator:10002/devstoreaccount1;
       - AzureWebJobsSecretStorageType=files
       - DiscordConfiguration__Token=${DISCORD_TOKEN}
       - DiscordConfiguration__GuildId=${DISCORD_GUILDID}
@@ -31,7 +31,7 @@ services:
   local.storage.emulator:
     image: mcr.microsoft.com/azure-storage/azurite:3.30.0
     container_name: local.storage.emulator
-    command: azurite --loose --disableProductStyleUrl --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --location /workspace --debug /workspace/debug.log
+    command: azurite --loose --disableProductStyleUrl --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002 --location /workspace --debug /workspace/debug.log
     ports:
       - 10000:10000
       - 10001:10001
