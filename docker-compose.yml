@@ -11,6 +11,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - AzureWebJobsStorage=AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=https;BlobEndpoint=http://azurite:local.storage.emulator/devstoreaccount1;QueueEndpoint=http://local.storage.emulator:10001/devstoreaccount1;TableEndpoint=http://local.storage.emulator:10002/devstoreaccount1;
+      - AzureWebJobsStorag2=UseDevelopmentStorage=true;
       - AzureWebJobsSecretStorageType=files
       - DiscordConfiguration__Token=${DISCORD_TOKEN}
       - DiscordConfiguration__GuildId=${DISCORD_GUILDID}
