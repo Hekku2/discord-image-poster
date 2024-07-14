@@ -45,16 +45,22 @@ Write-Host "Writing Function Core Toole support $funcSettingsFile"
 $localSettings = @{
     IsEncrypted = $false
     Values      = @{
-        AzureWebJobsStorage                  = 'UseDevelopmentStorage=true'
-        FUNCTIONS_WORKER_RUNTIME             = 'dotnet-isolated'
-        DiscordConfiguration__Token          = $settingsJson.DiscordToken
-        DiscordConfiguration__GuildId        = $settingsJson.DiscordGuildId
-        DiscordConfiguration__ChannelId      = $settingsJson.DiscordChannelId
-        DiscordConfiguration__PublicKey      = $settingsJson.DiscordPublicKey
-        ImageAnalysisConfiguration__Endpoint = $cognitiveServicesEndpoint
-        ImageIndexOptions__ContainerName     = 'images'
+        AzureWebJobsStorage                             = 'UseDevelopmentStorage=true'
+        FUNCTIONS_WORKER_RUNTIME                        = 'dotnet-isolated'
+        DiscordConfiguration__Token                     = $settingsJson.DiscordToken
+        DiscordConfiguration__GuildId                   = $settingsJson.DiscordGuildId
+        DiscordConfiguration__ChannelId                 = $settingsJson.DiscordChannelId
+        DiscordConfiguration__PublicKey                 = $settingsJson.DiscordPublicKey
+        ImageAnalysisConfiguration__Endpoint            = $cognitiveServicesEndpoint
+        BlobStorageImageSourceOptions__ConnectionString = 'UseDevelopmentStorage=true'
+        BlobStorageImageSourceOptions__ContainerName    = 'images'
+        BlobStorageImageSourceOptions__FolderPath       = 'root'
+        ImageIndexOptions__ConnectionString             = 'UseDevelopmentStorage=true'
+        ImageIndexOptions__ContainerName                = 'images'
+        ImageIndexOptions__IndexFileName                = 'index.json'
     }
 }
+
 $localSettings | ConvertTo-Json | Out-File -FilePath $funcSettingsFile -Encoding utf8
 
 Write-Host "Writing user-secrets for console tester."

@@ -1,5 +1,6 @@
 using System.Net;
 using DiscordImagePoster.Common.RandomizationService;
+using DiscordImagePoster.FunctionApp.Isolated.Functions;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.DurableTask.Client;
