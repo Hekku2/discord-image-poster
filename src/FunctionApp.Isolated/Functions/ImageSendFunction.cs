@@ -1,5 +1,4 @@
 using System.Net;
-using DiscordImagePoster.Common.RandomizationService;
 using DiscordImagePoster.FunctionApp.Isolated.Functions;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -13,17 +12,14 @@ public class ImageSendFunction
 {
     private readonly ILogger<ImageSendFunction> _logger;
     private readonly FeatureSettings _featureSettings;
-    private readonly IRandomImagePoster _randomImagePoster;
 
     public ImageSendFunction(
         ILogger<ImageSendFunction> logger,
-        IOptions<FeatureSettings> featureSettings,
-        IRandomImagePoster randomImagePoster
+        IOptions<FeatureSettings> featureSettings
     )
     {
         _logger = logger;
         _featureSettings = featureSettings.Value;
-        _randomImagePoster = randomImagePoster;
     }
 
     [Function("SendImage")]
@@ -40,7 +36,10 @@ public class ImageSendFunction
     }
 
     [Function("SendRandomImage")]
-    public async Task TriggerTimerSendRandomImage([TimerTrigger("0 0 */4 * * *")] TimerInfo timer)
+    public async Task TriggerTimerSendRandomImage(
+        [TimerTrigger("0 0 */4 * * *")] TimerInfo timer,
+        [DurableClient] DurableTaskClient client,
+        CancellationToken cancellation)
     {
         _logger.LogDebug("Sending timed random image");
         if (_featureSettings.DisableTimedSending)
@@ -49,7 +48,7 @@ public class ImageSendFunction
             return;
         }
 
-        await _randomImagePoster.PostRandomImageAsync();
+        await client.ScheduleNewOrchestrationInstanceAsync(nameof(ImageSendOrchestration), "", cancellation);
 
         if (timer.ScheduleStatus is not null)
         {
