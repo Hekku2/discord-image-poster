@@ -117,6 +117,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
       defaultDocuments: []
       linuxFxVersion: 'DOTNET-ISOLATED|8.0'
       phpVersion: null
+      netFrameworkVersion: 'v8.0'
       use32BitWorkerProcess: false
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
@@ -162,6 +163,10 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: 'dotnet-isolated'
+        }
+        {
+          name: 'WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED'
+          value: '1'
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'

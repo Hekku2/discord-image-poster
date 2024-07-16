@@ -404,3 +404,5 @@ FodyWeavers.xsd
 developer-settings.json
 publish.zip
 src/FunctionApp.Isolated/dev_secrets/sendimage.json
+
+__azurite_db_*.json
